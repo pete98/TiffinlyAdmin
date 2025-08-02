@@ -1,0 +1,22 @@
+{
+  "description": "Cursor rules for a Next.js project using shadcn/ui and TypeScript. Ensures code generation follows v0.shadcn conventions, component structure, and best practices.",
+  "autoAttach": {
+    "files": [
+      "components.json",
+      "components/ui/*",
+      "app/layout.tsx",
+      "tailwind.config.ts"
+    ],
+    "dependencies": [
+      "next",
+      "react",
+      "tailwindcss",
+      "@radix-ui/react-slot",
+      "shadcn/ui"
+    ]
+  }
+}
+description:
+globs:
+alwaysApply: false
+---
