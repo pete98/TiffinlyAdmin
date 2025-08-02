@@ -1,9 +1,8 @@
 import type { NextRequest } from "next/server";
+import { auth0 } from "./lib/auth0";
 
 export async function middleware(request: NextRequest) {
-  // For now, just pass through all requests
-  // We'll handle auth protection in the components
-  return;
+  return await auth0.middleware(request);
 }
 
 export const config = {
