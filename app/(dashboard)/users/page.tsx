@@ -8,7 +8,7 @@ import { DashboardTitle } from "@/components/dashboard/dashboard-title"
 import { UserTable } from "@/components/users/user-table"
 import { UserForm } from "@/components/users/user-form"
 import { useToast } from "@/components/ui/use-toast"
-import { apiFetch } from "@/lib/utils"
+import { apiClient } from "@/lib/api"
 
 const USER_API = "https://b6b2efcf5d8d.ngrok-free.app/api/users"
 
@@ -24,14 +24,32 @@ export default function UsersPage() {
   const fetchUsers = async () => {
     setLoading(true)
     try {
-      const data = await apiFetch<any[]>(`${USER_API}`)
-      setUsers(data)
+      const data = await apiClient.get<any>(`${USER_API}`)
+      
+      // Handle different response structures
+      let usersData: any[] = []
+      if (Array.isArray(data)) {
+        usersData = data
+      } else if (data && Array.isArray(data.data)) {
+        usersData = data.data
+      } else if (data && Array.isArray(data.users)) {
+        usersData = data.users
+      } else if (data && Array.isArray(data.items)) {
+        usersData = data.items
+      } else {
+        console.warn('Unexpected API response structure:', data)
+        usersData = []
+      }
+      
+      setUsers(usersData)
     } catch (err: any) {
+      console.error('Error fetching users:', err)
       toast({
         title: "Error fetching users",
         description: err.message,
         variant: "destructive",
       })
+      setUsers([])
     } finally {
       setLoading(false)
     }
@@ -42,32 +60,26 @@ export default function UsersPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const filteredUsers = users.filter(
+  const filteredUsers = Array.isArray(users) ? users.filter(
     (user) =>
-      user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.stripeCustomerId?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.subscriptionStatus?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.subscriptionId?.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+      user?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user?.stripeCustomerId?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user?.subscriptionStatus?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user?.subscriptionId?.toLowerCase().includes(searchQuery.toLowerCase())
+  ) : []
 
   const handleAddUser = async (user: any) => {
     try {
       if (editingUser) {
         // Update user
-        const updated = await apiFetch<any>(`${USER_API}/${editingUser.id}`, {
-          method: "PUT",
-          body: JSON.stringify(user),
-        })
+        const updated = await apiClient.put<any>(`${USER_API}/${editingUser.id}`, user)
         toast({
           title: "User updated",
           description: `${updated.name} has been updated successfully.`,
         })
       } else {
         // Create user
-        const created = await apiFetch<any>(`${USER_API}`, {
-          method: "POST",
-          body: JSON.stringify(user),
-        })
+        const created = await apiClient.post<any>(`${USER_API}`, user)
         toast({
           title: "User added",
           description: `${created.name} has been added successfully.`,
@@ -92,7 +104,7 @@ export default function UsersPage() {
 
   const handleDeleteUser = async (id: string) => {
     try {
-      await apiFetch(`${USER_API}/${id}`, { method: "DELETE" })
+      await apiClient.delete(`${USER_API}/${id}`)
       toast({
         title: "User deleted",
         description: "The user has been deleted successfully.",

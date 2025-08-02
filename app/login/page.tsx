@@ -1,6 +1,6 @@
 "use client"
 
-import { useSession } from "@/hooks/use-session"
+import { useAuth } from '@/hooks/use-auth'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import { Button } from '@/components/ui/button'
@@ -8,14 +8,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Loader2, ChefHat } from 'lucide-react'
 
 export default function LoginPage() {
-  const { user, isLoading, error } = useSession()
+  const { isAuthenticated, isLoading, login } = useAuth()
   const router = useRouter()
 
   useEffect(() => {
-    if (user) {
+    if (isAuthenticated) {
       router.push('/dashboard')
     }
-  }, [user, router])
+  }, [isAuthenticated, router])
 
   if (isLoading) {
     return (
@@ -28,17 +28,7 @@ export default function LoginPage() {
     )
   }
 
-  if (error) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <p className="text-red-600">Error: {error}</p>
-        </div>
-      </div>
-    )
-  }
-
-  if (user) {
+  if (isAuthenticated) {
     return null
   }
 
@@ -59,11 +49,12 @@ export default function LoginPage() {
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          <a href="/auth/login">
-            <Button className="w-full h-12 text-base font-medium bg-orange-600 hover:bg-orange-700 dark:bg-orange-500 dark:hover:bg-orange-600">
-              Sign In with Auth0
-            </Button>
-          </a>
+          <Button 
+            onClick={login} 
+            className="w-full h-12 text-base font-medium bg-orange-600 hover:bg-orange-700 dark:bg-orange-500 dark:hover:bg-orange-600"
+          >
+            Sign In with Auth0
+          </Button>
           
           <div className="text-center text-sm text-muted-foreground">
             <p>Secure authentication powered by Auth0</p>

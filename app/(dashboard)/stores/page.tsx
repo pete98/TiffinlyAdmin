@@ -8,7 +8,7 @@ import { DashboardTitle } from "@/components/dashboard/dashboard-title"
 import { StoreTable } from "@/components/stores/store-table"
 import { StoreForm } from "@/components/stores/store-form"
 import { useToast } from "@/components/ui/use-toast"
-import { apiFetch } from "@/lib/utils"
+import { apiClient } from "@/lib/api"
 
 const STORE_API = "https://b6b2efcf5d8d.ngrok-free.app/api/store"
 const KITCHEN_API = "https://b6b2efcf5d8d.ngrok-free.app/api/kitchen"
@@ -22,21 +22,78 @@ export default function StoresPage() {
   const [loading, setLoading] = useState(false)
   const { toast } = useToast()
 
-  // Fetch stores from backend
-  const fetchStores = async () => {
+  // Fetch all data in parallel
+  const fetchData = async () => {
     setLoading(true)
     try {
-      const data = await apiFetch<any[]>(`${STORE_API}`)
-      // Map isActive to status
-      setStores(
-        data.map(store => ({
-          ...store,
-          status: store.isActive ? "active" : "inactive",
-        }))
-      )
+      // Fetch both APIs in parallel to reduce total time and token requests
+      const [storesResult, kitchensResult] = await Promise.allSettled([
+        apiClient.get<any>(`${STORE_API}`),
+        apiClient.get<any>(`${KITCHEN_API}`)
+      ])
+
+      // Handle stores data
+      if (storesResult.status === 'fulfilled') {
+        let storesData: any[] = []
+        const data = storesResult.value
+        
+        if (Array.isArray(data)) {
+          storesData = data
+        } else if (data && Array.isArray(data.data)) {
+          storesData = data.data
+        } else if (data && Array.isArray(data.stores)) {
+          storesData = data.stores
+        } else if (data && Array.isArray(data.items)) {
+          storesData = data.items
+        } else {
+          console.warn('Unexpected stores API response structure:', data)
+          storesData = []
+        }
+        
+        setStores(
+          storesData.map(store => ({
+            ...store,
+            status: store.isActive ? "active" : "inactive",
+          }))
+        )
+      } else {
+        toast({
+          title: "Error fetching stores",
+          description: "Failed to load stores data",
+          variant: "destructive",
+        })
+      }
+
+      // Handle kitchens data
+      if (kitchensResult.status === 'fulfilled') {
+        let kitchensData: any[] = []
+        const data = kitchensResult.value
+        
+        if (Array.isArray(data)) {
+          kitchensData = data
+        } else if (data && Array.isArray(data.data)) {
+          kitchensData = data.data
+        } else if (data && Array.isArray(data.kitchens)) {
+          kitchensData = data.kitchens
+        } else if (data && Array.isArray(data.items)) {
+          kitchensData = data.items
+        } else {
+          console.warn('Unexpected kitchens API response structure:', data)
+          kitchensData = []
+        }
+        
+        setKitchens(kitchensData)
+      } else {
+        toast({
+          title: "Error fetching kitchens",
+          description: "Failed to load kitchens data",
+          variant: "destructive",
+        })
+      }
     } catch (err: any) {
+      console.error('Error fetching data:', err)
       toast({
-        title: "Error fetching stores",
+        title: "Error fetching data",
         description: err.message,
         variant: "destructive",
       })
@@ -45,23 +102,8 @@ export default function StoresPage() {
     }
   }
 
-  // Fetch kitchens for dropdown
-  const fetchKitchens = async () => {
-    try {
-      const data = await apiFetch<any[]>(`${KITCHEN_API}`)
-      setKitchens(data)
-    } catch (err: any) {
-      toast({
-        title: "Error fetching kitchens",
-        description: err.message,
-        variant: "destructive",
-      })
-    }
-  }
-
   useEffect(() => {
-    fetchStores()
-    fetchKitchens()
+    fetchData()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -76,12 +118,9 @@ export default function StoresPage() {
     try {
       if (editingStore) {
         // Update store
-        const updated = await apiFetch<any>(`${STORE_API}/${editingStore.id}`, {
-          method: "PUT",
-          body: JSON.stringify({
-            ...store,
-            kitchenId: getKitchenIdByName(store.kitchen),
-          }),
+        const updated = await apiClient.put<any>(`${STORE_API}/${editingStore.id}`, {
+          ...store,
+          kitchenId: getKitchenIdByName(store.kitchen),
         })
         toast({
           title: "Store updated",
@@ -89,12 +128,9 @@ export default function StoresPage() {
         })
       } else {
         // Create store
-        const created = await apiFetch<any>(`${STORE_API}`, {
-          method: "POST",
-          body: JSON.stringify({
-            ...store,
-            kitchenId: getKitchenIdByName(store.kitchen),
-          }),
+        const created = await apiClient.post<any>(`${STORE_API}`, {
+          ...store,
+          kitchenId: getKitchenIdByName(store.kitchen),
         })
         toast({
           title: "Store added",
@@ -103,7 +139,7 @@ export default function StoresPage() {
       }
       setIsFormOpen(false)
       setEditingStore(null)
-      await fetchStores()
+      await fetchData() // Refresh all data
     } catch (err: any) {
       toast({
         title: "Error saving store",
@@ -123,13 +159,13 @@ export default function StoresPage() {
 
   const handleDeleteStore = async (id: number) => {
     try {
-      await apiFetch(`${STORE_API}/${id}`, { method: "DELETE" })
+      await apiClient.delete(`${STORE_API}/${id}`)
       toast({
         title: "Store deleted",
         description: "The store has been deleted successfully.",
         variant: "destructive",
       })
-      await fetchStores()
+      await fetchData() // Refresh all data
     } catch (err: any) {
       toast({
         title: "Error deleting store",
@@ -142,12 +178,12 @@ export default function StoresPage() {
   const handleToggleStatus = async (id: number, currentStatus: string) => {
     try {
       const endpoint = `${STORE_API}/${id}/${currentStatus === "active" ? "deactivate" : "activate"}`
-      const updated = await apiFetch<any>(endpoint, { method: "PUT" })
+      const updated = await apiClient.put<any>(endpoint)
       toast({
         title: `Store ${updated.status}`,
         description: `${updated.name} is now ${updated.status}.`,
       })
-      await fetchStores()
+      await fetchData() // Refresh all data
     } catch (err: any) {
       toast({
         title: "Error updating status",

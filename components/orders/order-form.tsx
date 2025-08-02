@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { apiClient } from "@/lib/api"
 
 interface Order {
   id: number
@@ -119,11 +120,27 @@ export function OrderForm({ open, onOpenChange, onSubmit, initialData }: OrderFo
   useEffect(() => {
     const fetchMenuItems = async () => {
       try {
-        const response = await fetch("https://b6b2efcf5d8d.ngrok-free.app/api/menu-items")
-        const data = await response.json()
-        setMenuItems(data)
+        const data = await apiClient.get<any>("https://b6b2efcf5d8d.ngrok-free.app/api/menu-items")
+        
+        // Handle different response structures
+        let menuItemsData: MenuItem[] = []
+        if (Array.isArray(data)) {
+          menuItemsData = data
+        } else if (data && Array.isArray(data.data)) {
+          menuItemsData = data.data
+        } else if (data && Array.isArray(data.menuItems)) {
+          menuItemsData = data.menuItems
+        } else if (data && Array.isArray(data.items)) {
+          menuItemsData = data.items
+        } else {
+          console.warn('Unexpected menu items API response structure:', data)
+          menuItemsData = []
+        }
+        
+        setMenuItems(menuItemsData)
       } catch (error) {
         console.error("Error fetching menu items:", error)
+        setMenuItems([])
       }
     }
     fetchMenuItems()

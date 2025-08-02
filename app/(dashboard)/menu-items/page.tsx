@@ -8,7 +8,7 @@ import { DashboardTitle } from "@/components/dashboard/dashboard-title"
 import { MenuItemTable } from "@/components/menu-items/menu-item-table"
 import { MenuItemForm } from "@/components/menu-items/menu-item-form"
 import { useToast } from "@/components/ui/use-toast"
-import { apiFetch } from "@/lib/utils"
+import { apiClient } from "@/lib/api"
 
 const MENU_API = "https://b6b2efcf5d8d.ngrok-free.app/api/menu-items"
 
@@ -40,14 +40,32 @@ export default function MenuItemsPage() {
   const fetchMenuItems = async () => {
     setLoading(true)
     try {
-      const data = await apiFetch<MenuItem[]>(`${MENU_API}`)
-      setMenuItems(data)
+      const data = await apiClient.get<any>(`${MENU_API}`)
+      
+      // Handle different response structures
+      let menuItemsData: MenuItem[] = []
+      if (Array.isArray(data)) {
+        menuItemsData = data
+      } else if (data && Array.isArray(data.data)) {
+        menuItemsData = data.data
+      } else if (data && Array.isArray(data.menuItems)) {
+        menuItemsData = data.menuItems
+      } else if (data && Array.isArray(data.items)) {
+        menuItemsData = data.items
+      } else {
+        console.warn('Unexpected API response structure:', data)
+        menuItemsData = []
+      }
+      
+      setMenuItems(menuItemsData)
     } catch (err: any) {
+      console.error('Error fetching menu items:', err)
       toast({
         title: "Error fetching menu items",
         description: err.message,
         variant: "destructive",
       })
+      setMenuItems([])
     } finally {
       setLoading(false)
     }
@@ -58,33 +76,27 @@ export default function MenuItemsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const filteredMenuItems = menuItems.filter(
+  const filteredMenuItems = Array.isArray(menuItems) ? menuItems.filter(
     (item) =>
-      (item.mainItem?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
-      (item.secondaryItem?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
-      (item.sideItem?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
-      (item.description?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
-      (item.weekday?.toLowerCase() || "").includes(searchQuery.toLowerCase())
-  )
+      (item?.mainItem?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
+      (item?.secondaryItem?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
+      (item?.sideItem?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
+      (item?.description?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
+      (item?.weekday?.toLowerCase() || "").includes(searchQuery.toLowerCase())
+  ) : []
 
   const handleAddMenuItem = async (menuItem: any) => {
     try {
       if (editingMenuItem) {
         // Update menu item
-        const updated = await apiFetch<MenuItem>(`${MENU_API}/${editingMenuItem.id}`, {
-          method: "PUT",
-          body: JSON.stringify(menuItem),
-        })
+        const updated = await apiClient.put<MenuItem>(`${MENU_API}/${editingMenuItem.id}`, menuItem)
         toast({
           title: "Menu item updated",
           description: `${updated.mainItem} has been updated successfully.`,
         })
       } else {
         // Create menu item
-        const created = await apiFetch<MenuItem>(`${MENU_API}`, {
-          method: "POST",
-          body: JSON.stringify(menuItem),
-        })
+        const created = await apiClient.post<MenuItem>(`${MENU_API}`, menuItem)
         toast({
           title: "Menu item added",
           description: `${created.mainItem} has been added successfully.`,
@@ -109,7 +121,7 @@ export default function MenuItemsPage() {
 
   const handleDeleteMenuItem = async (id: number) => {
     try {
-      await apiFetch(`${MENU_API}/${id}`, { method: "DELETE" })
+      await apiClient.delete(`${MENU_API}/${id}`)
       toast({
         title: "Menu item deleted",
         description: "The menu item has been deleted successfully.",

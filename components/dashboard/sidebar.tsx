@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Building2, ChevronLeft, ChevronRight, Home, Package, ShoppingBag, Utensils, Users, Shield } from "lucide-react"
+import { Building2, ChevronLeft, ChevronRight, Home, Package, ShoppingBag, Utensils, Users } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 
@@ -39,7 +39,7 @@ export function DashboardSidebar({ open, onOpenChange }: SidebarProps) {
     { name: "Menu Items", href: "/menu-items", icon: Utensils },
     { name: "Orders", href: "/orders", icon: Package },
     { name: "Products", href: "/products", icon: Package },
-    { name: "Auth Demo", href: "/auth-demo", icon: Shield },
+
   ]
 
   return (

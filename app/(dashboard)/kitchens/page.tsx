@@ -8,7 +8,7 @@ import { DashboardTitle } from "@/components/dashboard/dashboard-title"
 import { KitchenTable } from "@/components/kitchens/kitchen-table"
 import { KitchenForm } from "@/components/kitchens/kitchen-form"
 import { useToast } from "@/components/ui/use-toast"
-import { apiFetch } from "@/lib/utils"
+import { apiClient } from "@/lib/api"
 
 const API_BASE = "https://b6b2efcf5d8d.ngrok-free.app/api/kitchen"
 
@@ -22,51 +22,75 @@ export default function KitchensPage() {
 
   // Fetch kitchens from backend
   const fetchKitchens = async () => {
+    console.log('fetchKitchens function called')
     setLoading(true)
     try {
-      const data = await apiFetch<any[]>(`${API_BASE}`)
-      setKitchens(data)
+      console.log('About to make API call to:', `${API_BASE}`)
+      const data = await apiClient.get<any>(`${API_BASE}`)
+      console.log('API call completed, response:', data)
+      
+      // Handle different response structures
+      let kitchensData: any[] = []
+      if (Array.isArray(data)) {
+        kitchensData = data
+      } else if (data && Array.isArray(data.data)) {
+        kitchensData = data.data
+      } else if (data && Array.isArray(data.kitchens)) {
+        kitchensData = data.kitchens
+      } else if (data && Array.isArray(data.items)) {
+        kitchensData = data.items
+      } else {
+        console.warn('Unexpected API response structure:', data)
+        kitchensData = []
+      }
+      
+      console.log('Kitchen data:', kitchensData)
+      setKitchens(kitchensData)
     } catch (err: any) {
+      console.error('Error fetching kitchens:', err)
+      console.error('Error details:', {
+        message: err.message,
+        status: err.response?.status,
+        statusText: err.response?.statusText,
+        data: err.response?.data,
+        url: err.config?.url
+      })
       toast({
         title: "Error fetching kitchens",
         description: err.message,
         variant: "destructive",
       })
+      setKitchens([])
     } finally {
       setLoading(false)
     }
   }
 
   useEffect(() => {
+    console.log('Kitchens page useEffect triggered')
     fetchKitchens()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const filteredKitchens = kitchens.filter(
+  const filteredKitchens = Array.isArray(kitchens) ? kitchens.filter(
     (kitchen) =>
-      kitchen.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      kitchen.city.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      kitchen.email.toLowerCase().includes(searchQuery.toLowerCase()),
-  )
+      kitchen?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      kitchen?.city?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      kitchen?.email?.toLowerCase().includes(searchQuery.toLowerCase()),
+  ) : []
 
   const handleAddKitchen = async (kitchen: any) => {
     try {
       if (editingKitchen) {
         // Update kitchen
-        const updated = await apiFetch<any>(`${API_BASE}/${editingKitchen.id}`, {
-          method: "PUT",
-          body: JSON.stringify(kitchen),
-        })
+        const updated = await apiClient.put<any>(`${API_BASE}/${editingKitchen.id}`, kitchen)
         toast({
           title: "Kitchen updated",
           description: `${updated.name} has been updated successfully.`,
         })
       } else {
         // Create kitchen
-        const created = await apiFetch<any>(`${API_BASE}`, {
-          method: "POST",
-          body: JSON.stringify(kitchen),
-        })
+        const created = await apiClient.post<any>(`${API_BASE}`, kitchen)
         toast({
           title: "Kitchen added",
           description: `${created.name} has been added successfully.`,
@@ -91,7 +115,7 @@ export default function KitchensPage() {
 
   const handleDeleteKitchen = async (id: number) => {
     try {
-      await apiFetch(`${API_BASE}/${id}`, { method: "DELETE" })
+      await apiClient.delete(`${API_BASE}/${id}`)
       toast({
         title: "Kitchen deleted",
         description: "The kitchen has been deleted successfully.",

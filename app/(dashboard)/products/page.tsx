@@ -8,7 +8,7 @@ import { DashboardTitle } from "@/components/dashboard/dashboard-title"
 import { ProductTable } from "@/components/products/product-table"
 import { ProductForm } from "@/components/products/product-form"
 import { useToast } from "@/components/ui/use-toast"
-import { apiFetch } from "@/lib/utils"
+import { apiClient } from "@/lib/api"
 
 const PRODUCT_API = "https://b6b2efcf5d8d.ngrok-free.app/api/products"
 
@@ -33,14 +33,32 @@ export default function ProductsPage() {
   const fetchProducts = async () => {
     setLoading(true)
     try {
-      const data = await apiFetch<Product[]>(`${PRODUCT_API}`)
-      setProducts(data)
+      const data = await apiClient.get<any>(`${PRODUCT_API}`)
+      
+      // Handle different response structures
+      let productsData: Product[] = []
+      if (Array.isArray(data)) {
+        productsData = data
+      } else if (data && Array.isArray(data.data)) {
+        productsData = data.data
+      } else if (data && Array.isArray(data.products)) {
+        productsData = data.products
+      } else if (data && Array.isArray(data.items)) {
+        productsData = data.items
+      } else {
+        console.warn('Unexpected API response structure:', data)
+        productsData = []
+      }
+      
+      setProducts(productsData)
     } catch (err: any) {
+      console.error('Error fetching products:', err)
       toast({
         title: "Error fetching products",
         description: err.message,
         variant: "destructive",
       })
+      setProducts([])
     } finally {
       setLoading(false)
     }
@@ -51,31 +69,25 @@ export default function ProductsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const filteredProducts = products.filter(
+  const filteredProducts = Array.isArray(products) ? products.filter(
     (product) =>
-      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.description.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+      product?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product?.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product?.description?.toLowerCase().includes(searchQuery.toLowerCase())
+  ) : []
 
   const handleAddProduct = async (product: any) => {
     try {
       if (editingProduct) {
         // Update product
-        const updated = await apiFetch<Product>(`${PRODUCT_API}/${editingProduct.id}`, {
-          method: "PUT",
-          body: JSON.stringify(product),
-        })
+        const updated = await apiClient.put<Product>(`${PRODUCT_API}/${editingProduct.id}`, product)
         toast({
           title: "Product updated",
           description: `${updated.name} has been updated successfully.`,
         })
       } else {
         // Create product
-        const created = await apiFetch<Product>(`${PRODUCT_API}`, {
-          method: "POST",
-          body: JSON.stringify(product),
-        })
+        const created = await apiClient.post<Product>(`${PRODUCT_API}`, product)
         toast({
           title: "Product added",
           description: `${created.name} has been added successfully.`,
@@ -100,7 +112,7 @@ export default function ProductsPage() {
 
   const handleDeleteProduct = async (id: number) => {
     try {
-      await apiFetch(`${PRODUCT_API}/${id}`, { method: "DELETE" })
+      await apiClient.delete(`${PRODUCT_API}/${id}`)
       toast({
         title: "Product deleted",
         description: "The product has been deleted successfully.",
