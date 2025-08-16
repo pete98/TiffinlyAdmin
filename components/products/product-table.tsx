@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Edit, MoreHorizontal, Trash } from "lucide-react"
+import { Edit, MoreHorizontal, Trash, Image as ImageIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -13,6 +13,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -38,13 +44,69 @@ export interface Product {
   category: string
   price: number
   description: string
+  imgUrl?: string
   isActive: boolean
+  stripeProductId?: string
 }
 
 interface ProductTableProps {
   products: Product[]
   onEdit: (product: Product) => void
   onDelete: (id: number) => void
+}
+
+// Image component with fallback handling
+function ProductImage({ imgUrl, name }: { imgUrl?: string; name: string }) {
+  const [imageError, setImageError] = useState(false)
+  const [imageLoading, setImageLoading] = useState(true)
+
+  const handleImageLoad = () => {
+    setImageLoading(false)
+    setImageError(false)
+  }
+
+  const handleImageError = () => {
+    setImageLoading(false)
+    setImageError(true)
+  }
+
+  const shouldShowPlaceholder = !imgUrl || imageError
+
+  return (
+    <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
+      {imageLoading && !shouldShowPlaceholder && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="w-4 h-4 border-2 border-gray-300 border-t-blue-600 rounded-full animate-spin"></div>
+        </div>
+      )}
+      
+      {shouldShowPlaceholder ? (
+        <div className="w-full h-full flex items-center justify-center bg-gray-200">
+          <img 
+            src="/placeholder-product.svg" 
+            alt="Product placeholder" 
+            className="w-8 h-8 opacity-60"
+            onError={(e) => {
+              // Fallback to icon if SVG fails
+              e.currentTarget.style.display = 'none'
+              const icon = e.currentTarget.nextElementSibling as HTMLElement
+              if (icon) icon.style.display = 'block'
+            }}
+          />
+          <ImageIcon className="w-6 h-6 text-gray-400 hidden" />
+        </div>
+      ) : (
+        <img
+          src={imgUrl}
+          alt={name}
+          className="w-full h-full object-cover"
+          onLoad={handleImageLoad}
+          onError={handleImageError}
+          loading="lazy"
+        />
+      )}
+    </div>
+  )
 }
 
 export function ProductTable({ products, onEdit, onDelete }: ProductTableProps) {
@@ -74,18 +136,19 @@ export function ProductTable({ products, onEdit, onDelete }: ProductTableProps) 
           <TableHeader>
             <TableRow>
               <TableHead>#</TableHead>
+              <TableHead className="hidden sm:table-cell">Image</TableHead>
               <TableHead>Name</TableHead>
-              <TableHead>Category</TableHead>
+              <TableHead className="hidden md:table-cell">Category</TableHead>
               <TableHead>Price</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead>Status</TableHead>
+              <TableHead className="hidden lg:table-cell">Description</TableHead>
+              <TableHead className="hidden sm:table-cell">Status</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {paginatedProducts.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="h-24 text-center">
+                <TableCell colSpan={8} className="h-24 text-center">
                   No products found.
                 </TableCell>
               </TableRow>
@@ -93,11 +156,37 @@ export function ProductTable({ products, onEdit, onDelete }: ProductTableProps) 
               paginatedProducts.map((product, idx) => (
                 <TableRow key={product.id}>
                   <TableCell className="font-medium">{startIndex + idx + 1}</TableCell>
-                  <TableCell>{product.name}</TableCell>
-                  <TableCell>{product.category}</TableCell>
-                  <TableCell>${product.price.toFixed(2)}</TableCell>
-                  <TableCell className="max-w-xs truncate">{product.description}</TableCell>
+                  <TableCell className="hidden sm:table-cell">
+                    <ProductImage imgUrl={product.imgUrl} name={product.name} />
+                  </TableCell>
                   <TableCell>
+                    <div className="flex flex-col">
+                      <span className="font-medium">{product.name}</span>
+                      {product.stripeProductId && (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="text-xs text-blue-600 font-medium flex items-center gap-1 cursor-help">
+                                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                </svg>
+                                Stripe Synced
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Stripe Product ID: {product.stripeProductId}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      )}
+                      <span className="text-sm text-gray-500 sm:hidden">{product.category}</span>
+                      <span className="text-sm text-gray-500 sm:hidden">${product.price.toFixed(2)}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="hidden md:table-cell">{product.category}</TableCell>
+                  <TableCell className="hidden sm:table-cell">${product.price.toFixed(2)}</TableCell>
+                  <TableCell className="hidden lg:table-cell max-w-xs truncate">{product.description}</TableCell>
+                  <TableCell className="hidden sm:table-cell">
                     <Badge
                       variant={product.isActive ? "default" : "secondary"}
                       className={product.isActive ? "bg-green-500 hover:bg-green-600" : "bg-slate-500"}

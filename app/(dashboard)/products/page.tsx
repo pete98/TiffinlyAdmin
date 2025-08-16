@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -18,7 +18,9 @@ interface Product {
   category: string
   price: number
   description: string
+  imgUrl?: string
   isActive: boolean
+  stripeProductId?: string
 }
 
 export default function ProductsPage() {
@@ -76,22 +78,73 @@ export default function ProductsPage() {
       product?.description?.toLowerCase().includes(searchQuery.toLowerCase())
   ) : []
 
-  const handleAddProduct = async (product: any) => {
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [lastSubmissionTime, setLastSubmissionTime] = useState(0)
+
+  const handleAddProduct = useCallback(async (product: any) => {
+    const now = Date.now()
+    const timeSinceLastSubmission = now - lastSubmissionTime
+    
+    console.log('🔄 Product submission attempt:', {
+      isSubmitting,
+      timeSinceLastSubmission,
+      productName: product.name,
+      isEdit: !!editingProduct
+    })
+    
+    // Prevent submissions within 2 seconds of each other
+    if (timeSinceLastSubmission < 2000) {
+      console.log('❌ Preventing rapid successive submissions')
+      return
+    }
+    
+    // Prevent double submission
+    if (isSubmitting) {
+      console.log('❌ Preventing duplicate submission')
+      return
+    }
+
+    console.log('✅ Proceeding with submission')
+    setIsSubmitting(true)
+    setLastSubmissionTime(now)
+    
     try {
       if (editingProduct) {
         // Update product
+        console.log('🔄 Making PUT request to update product:', editingProduct.id)
         const updated = await apiClient.put<Product>(`${PRODUCT_API}/${editingProduct.id}`, product)
-        toast({
-          title: "Product updated",
-          description: `${updated.name} has been updated successfully.`,
-        })
+        console.log('✅ Product updated successfully:', updated)
+        
+        // Enhanced success message with Stripe ID if available
+        if (updated.stripeProductId) {
+          toast({
+            title: "Product updated successfully! 🎉",
+            description: `${updated.name} has been updated and remains synced with Stripe (ID: ${updated.stripeProductId})`,
+          })
+        } else {
+          toast({
+            title: "Product updated",
+            description: `${updated.name} has been updated successfully.`,
+          })
+        }
       } else {
         // Create product
+        console.log('🔄 Making POST request to create product:', product.name)
         const created = await apiClient.post<Product>(`${PRODUCT_API}`, product)
-        toast({
-          title: "Product added",
-          description: `${created.name} has been added successfully.`,
-        })
+        console.log('✅ Product created successfully:', created)
+        
+        // Enhanced success message with Stripe ID if available
+        if (created.stripeProductId) {
+          toast({
+            title: "Product created successfully! 🎉",
+            description: `${created.name} has been added and synced with Stripe (ID: ${created.stripeProductId})`,
+          })
+        } else {
+          toast({
+            title: "Product added",
+            description: `${created.name} has been added successfully.`,
+          })
+        }
       }
       setIsFormOpen(false)
       setEditingProduct(null)
@@ -102,8 +155,10 @@ export default function ProductsPage() {
         description: err.message,
         variant: "destructive",
       })
+    } finally {
+      setIsSubmitting(false)
     }
-  }
+  }, [editingProduct, isSubmitting, lastSubmissionTime, toast, fetchProducts])
 
   const handleEditProduct = (product: Product) => {
     setEditingProduct(product)
