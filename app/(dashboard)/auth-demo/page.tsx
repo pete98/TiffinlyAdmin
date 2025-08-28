@@ -1,5 +1,5 @@
-import { SessionInfo } from "@/components/auth/session-info"
-import { AccessTokenDemo } from "@/components/auth/access-token-demo"
+import { AccessTokenDisplay } from "@/components/dashboard/access-token-display"
+import { BearerTokenTest } from "@/components/dashboard/bearer-token-test"
 import { DashboardTitle } from "@/components/dashboard/dashboard-title"
 
 export default function AuthDemoPage() {
@@ -11,8 +11,8 @@ export default function AuthDemoPage() {
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <SessionInfo />
-        <AccessTokenDemo />
+        <AccessTokenDisplay />
+        <BearerTokenTest />
       </div>
 
       <div className="mt-8 p-4 bg-muted rounded-lg">

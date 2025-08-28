@@ -9,8 +9,9 @@ import { KitchenTable } from "@/components/kitchens/kitchen-table"
 import { KitchenForm } from "@/components/kitchens/kitchen-form"
 import { useToast } from "@/components/ui/use-toast"
 import { apiClient } from "@/lib/api"
+import { API_ENDPOINTS } from "@/lib/constants"
 
-const API_BASE = "https://b6b2efcf5d8d.ngrok-free.app/api/kitchen"
+  const API_BASE = API_ENDPOINTS.KITCHEN
 
 export default function KitchensPage() {
   const [isFormOpen, setIsFormOpen] = useState(false)

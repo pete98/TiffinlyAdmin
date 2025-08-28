@@ -9,23 +9,29 @@ import { MenuItemTable } from "@/components/menu-items/menu-item-table"
 import { MenuItemForm } from "@/components/menu-items/menu-item-form"
 import { useToast } from "@/components/ui/use-toast"
 import { apiClient } from "@/lib/api"
+import { API_ENDPOINTS } from "@/lib/constants"
 
-const MENU_API = "https://b6b2efcf5d8d.ngrok-free.app/api/menu-items"
+  const MENU_API = API_ENDPOINTS.MENU_ITEMS
 
 interface MenuItem {
   id: number
   mainItem: string
   mainItemQuantity: number
+  mainItemCalories: number
   secondaryItem: string
   secondaryItemQuantity: number
+  secondaryItemCalories: number
   sideItem: string
   sideItemQuantity: number
+  sideItemCalories: number
   price: number
   imageUrl: string
   description: string
   weekday: string
   weekDate: string
   isActive: boolean
+  createdAt: string
+  updatedAt: string
 }
 
 export default function MenuItemsPage() {

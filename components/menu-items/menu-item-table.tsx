@@ -36,16 +36,21 @@ interface MenuItem {
   id: number
   mainItem: string
   mainItemQuantity: number
+  mainItemCalories: number
   secondaryItem: string
   secondaryItemQuantity: number
+  secondaryItemCalories: number
   sideItem: string
   sideItemQuantity: number
+  sideItemCalories: number
   price: number
   imageUrl: string
   description: string
   weekday: string
   weekDate: string
   isActive: boolean
+  createdAt: string
+  updatedAt: string
 }
 
 interface MenuItemTableProps {
@@ -84,10 +89,13 @@ export function MenuItemTable({ menuItems, onEdit, onDelete }: MenuItemTableProp
               <TableHead>Image</TableHead>
               <TableHead>Main Item</TableHead>
               <TableHead>Main Qty</TableHead>
+              <TableHead>Main Calories</TableHead>
               <TableHead>Secondary Item</TableHead>
               <TableHead>Secondary Qty</TableHead>
+              <TableHead>Secondary Calories</TableHead>
               <TableHead>Side Item</TableHead>
               <TableHead>Side Qty</TableHead>
+              <TableHead>Side Calories</TableHead>
               <TableHead>Price</TableHead>
               <TableHead>Weekday</TableHead>
               <TableHead>Status</TableHead>
@@ -97,7 +105,7 @@ export function MenuItemTable({ menuItems, onEdit, onDelete }: MenuItemTableProp
           <TableBody>
             {paginatedMenuItems.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={9} className="h-24 text-center">
+                <TableCell colSpan={15} className="h-24 text-center">
                   No menu items found.
                 </TableCell>
               </TableRow>
@@ -120,10 +128,13 @@ export function MenuItemTable({ menuItems, onEdit, onDelete }: MenuItemTableProp
                   </TableCell>
                   <TableCell>{menuItem.mainItem || "-"}</TableCell>
                   <TableCell>{menuItem.mainItemQuantity || 0}</TableCell>
+                  <TableCell>{menuItem.mainItemCalories || 0}</TableCell>
                   <TableCell>{menuItem.secondaryItem || "-"}</TableCell>
                   <TableCell>{menuItem.secondaryItemQuantity || 0}</TableCell>
+                  <TableCell>{menuItem.secondaryItemCalories || 0}</TableCell>
                   <TableCell>{menuItem.sideItem || "-"}</TableCell>
                   <TableCell>{menuItem.sideItemQuantity || 0}</TableCell>
+                  <TableCell>{menuItem.sideItemCalories || 0}</TableCell>
                   <TableCell>${menuItem.price || 0}</TableCell>
                   <TableCell>{menuItem.weekday || "-"}</TableCell>
                   <TableCell>

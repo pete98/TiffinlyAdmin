@@ -7,16 +7,18 @@ import { Input } from "@/components/ui/input"
 import { DashboardTitle } from "@/components/dashboard/dashboard-title"
 import { UserTable } from "@/components/users/user-table"
 import { UserForm } from "@/components/users/user-form"
+import { UserDetailsModal } from "@/components/users/user-details-modal"
 import { useToast } from "@/components/ui/use-toast"
-import { apiClient } from "@/lib/api"
-
-const USER_API = "https://b6b2efcf5d8d.ngrok-free.app/api/users"
+import { UserService } from "@/lib/user-service"
+import { UserProfile, UserProfileUpdate, UserSubscriptionUpdate } from "@/lib/types"
 
 export default function UsersPage() {
   const [isFormOpen, setIsFormOpen] = useState(false)
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
-  const [users, setUsers] = useState<any[]>([])
-  const [editingUser, setEditingUser] = useState<any>(null)
+  const [users, setUsers] = useState<UserProfile[]>([])
+  const [editingUser, setEditingUser] = useState<UserProfile | null>(null)
+  const [viewingUser, setViewingUser] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(false)
   const { toast } = useToast()
 
@@ -24,29 +26,13 @@ export default function UsersPage() {
   const fetchUsers = async () => {
     setLoading(true)
     try {
-      const data = await apiClient.get<any>(`${USER_API}`)
-      
-      // Handle different response structures
-      let usersData: any[] = []
-      if (Array.isArray(data)) {
-        usersData = data
-      } else if (data && Array.isArray(data.data)) {
-        usersData = data.data
-      } else if (data && Array.isArray(data.users)) {
-        usersData = data.users
-      } else if (data && Array.isArray(data.items)) {
-        usersData = data.items
-      } else {
-        console.warn('Unexpected API response structure:', data)
-        usersData = []
-      }
-      
+      const usersData = await UserService.getAllUsers()
       setUsers(usersData)
     } catch (err: any) {
       console.error('Error fetching users:', err)
       toast({
         title: "Error fetching users",
-        description: err.message,
+        description: err.message || "Failed to fetch users",
         variant: "destructive",
       })
       setUsers([])
@@ -60,85 +46,113 @@ export default function UsersPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const filteredUsers = Array.isArray(users) ? users.filter(
+  const filteredUsers = users.filter(
     (user) =>
-      user?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user?.firstName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user?.lastName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user?.phoneNumber?.includes(searchQuery) ||
+      user?.city?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user?.stripeCustomerId?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user?.subscriptionStatus?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user?.subscriptionId?.toLowerCase().includes(searchQuery.toLowerCase())
-  ) : []
+      user?.subscriptionType?.toLowerCase().includes(searchQuery.toLowerCase())
+  )
 
-  const handleAddUser = async (user: any) => {
+  const handleUserAction = async (userData: UserProfileUpdate | UserSubscriptionUpdate, type: 'profile' | 'subscription') => {
+    if (!editingUser || !editingUser.auth0Id) {
+      toast({
+        title: "Error",
+        description: "Invalid user data",
+        variant: "destructive",
+      })
+      return
+    }
+
     try {
-      if (editingUser) {
-        // Update user
-        const updated = await apiClient.put<any>(`${USER_API}/${editingUser.id}`, user)
+      let updated: UserProfile
+      
+      if (type === 'profile') {
+        // Update user profile using extended-profile endpoint
+        updated = await UserService.updateUserProfile(editingUser.auth0Id, userData)
         toast({
-          title: "User updated",
-          description: `${updated.name} has been updated successfully.`,
+          title: "Profile updated",
+          description: `${editingUser.firstName || 'User'}'s profile has been updated successfully.`,
         })
       } else {
-        // Create user
-        const created = await apiClient.post<any>(`${USER_API}`, user)
+        // Update user subscription using main user endpoint
+        updated = await UserService.updateUserSubscription(editingUser.auth0Id, userData)
         toast({
-          title: "User added",
-          description: `${created.name} has been added successfully.`,
+          title: "Subscription updated",
+          description: `${editingUser.firstName || 'User'}'s subscription has been updated successfully.`,
         })
       }
+
       setIsFormOpen(false)
       setEditingUser(null)
       await fetchUsers()
     } catch (err: any) {
       toast({
-        title: "Error saving user",
-        description: err.message,
+        title: "Error updating user",
+        description: err.message || "Failed to update user",
         variant: "destructive",
       })
     }
   }
 
-  const handleEditUser = (user: any) => {
+  const handleEditUser = (user: UserProfile) => {
     setEditingUser(user)
     setIsFormOpen(true)
   }
 
-  const handleDeleteUser = async (id: string) => {
+  const handleViewUser = (user: UserProfile) => {
+    setViewingUser(user)
+    setIsDetailsOpen(true)
+  }
+
+  const handleDeleteUser = async (auth0Id: string) => {
+    if (!auth0Id) {
+      toast({
+        title: "Error",
+        description: "Invalid user ID",
+        variant: "destructive",
+      })
+      return
+    }
+
     try {
-      await apiClient.delete(`${USER_API}/${id}`)
+      await UserService.deleteUser(auth0Id)
       toast({
         title: "User deleted",
         description: "The user has been deleted successfully.",
-        variant: "destructive",
       })
       await fetchUsers()
     } catch (err: any) {
       toast({
         title: "Error deleting user",
-        description: err.message,
+        description: err.message || "Failed to delete user",
         variant: "destructive",
       })
     }
   }
 
+  const handleAddUser = () => {
+    setEditingUser(null)
+    setIsFormOpen(true)
+  }
+
   return (
     <div className="space-y-6">
-      <DashboardTitle title="User Management" description="Add, edit, and manage your users" />
+      <DashboardTitle title="User Management" description="Manage user profiles, subscriptions, and billing information" />
 
       <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
         <div className="w-full sm:w-auto">
           <Input
-            placeholder="Search users..."
+            placeholder="Search users by name, phone, city, subscription status, or type..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="max-w-sm"
           />
         </div>
-        <Button
-          onClick={() => {
-            setEditingUser(null)
-            setIsFormOpen(true)
-          }}
-        >
+        <Button onClick={handleAddUser}>
           <Plus className="mr-2 h-4 w-4" />
           Add New User
         </Button>
@@ -150,18 +164,22 @@ export default function UsersPage() {
         <UserTable
           users={filteredUsers}
           onEdit={handleEditUser}
-          onDelete={(id: string) => {
-                    const user = users.find((u) => u.id === id)
-        if (user) handleDeleteUser(user.id)
-          }}
+          onDelete={handleDeleteUser}
+          onView={handleViewUser}
         />
       )}
 
       <UserForm
         open={isFormOpen}
         onOpenChange={setIsFormOpen}
-        onSubmit={handleAddUser}
+        onSubmit={handleUserAction}
         initialData={editingUser}
+      />
+
+      <UserDetailsModal
+        open={isDetailsOpen}
+        onOpenChange={setIsDetailsOpen}
+        user={viewingUser}
       />
     </div>
   )

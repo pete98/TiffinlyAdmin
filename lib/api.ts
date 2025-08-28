@@ -62,6 +62,7 @@ async function getAccessToken(): Promise<string | null> {
 // Create axios instance with default config
 const createApiInstance = (): AxiosInstance => {
   const instance = axios.create({
+    baseURL: process.env.NEXT_PUBLIC_API_URL || 'https://3a19295b5657.ngrok-free.app',
     headers: {
       'Content-Type': 'application/json',
       'ngrok-skip-browser-warning': 'true',

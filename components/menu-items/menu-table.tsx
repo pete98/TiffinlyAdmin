@@ -7,13 +7,19 @@ import { Separator } from "@/components/ui/separator"
 interface MenuItem {
   mainItem: string
   mainItemQuantity: number
+  mainItemCalories: number
   secondaryItem: string
   secondaryItemQuantity: number
+  secondaryItemCalories: number
   sideItem: string
   sideItemQuantity: number
+  sideItemCalories: number
   price: number
   imageUrl: string
   description?: string
+  weekday?: string
+  weekDate?: string
+  isActive?: boolean
 }
 
 interface MenuTableProps {

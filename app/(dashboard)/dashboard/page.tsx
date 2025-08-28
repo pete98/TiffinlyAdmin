@@ -8,9 +8,10 @@ import { QuickActions } from "@/components/dashboard/quick-actions"
 import { AccessTokenDisplay } from "@/components/dashboard/access-token-display"
 import { BearerTokenTest } from "@/components/dashboard/bearer-token-test"
 import { apiClient } from "@/lib/api"
+import { API_ENDPOINTS } from "@/lib/constants"
 
-const KITCHEN_API = "https://b6b2efcf5d8d.ngrok-free.app/api/kitchen"
-const STORE_API = "https://b6b2efcf5d8d.ngrok-free.app/api/store"
+  const KITCHEN_API = API_ENDPOINTS.KITCHEN
+  const STORE_API = API_ENDPOINTS.STORE
 
 export default function DashboardPage() {
   const [kitchenCount, setKitchenCount] = useState<number | null>(null)

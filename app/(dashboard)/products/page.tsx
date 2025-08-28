@@ -9,8 +9,9 @@ import { ProductTable } from "@/components/products/product-table"
 import { ProductForm } from "@/components/products/product-form"
 import { useToast } from "@/components/ui/use-toast"
 import { apiClient } from "@/lib/api"
+import { API_ENDPOINTS } from "@/lib/constants"
 
-const PRODUCT_API = "https://b6b2efcf5d8d.ngrok-free.app/api/products"
+  const PRODUCT_API = API_ENDPOINTS.PRODUCTS
 
 interface Product {
   id: number

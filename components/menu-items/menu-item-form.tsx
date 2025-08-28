@@ -13,14 +13,18 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
+import { Switch } from "@/components/ui/switch"
 
 interface MenuItemFormValues {
   mainItem: string
   mainItemQuantity: number
+  mainItemCalories: number
   secondaryItem: string
   secondaryItemQuantity: number
+  secondaryItemCalories: number
   sideItem: string
   sideItemQuantity: number
+  sideItemCalories: number
   price: number
   imageUrl: string
   description: string
@@ -43,10 +47,13 @@ export function MenuItemForm({ open, onOpenChange, onSubmit, initialData }: Menu
     defaultValues: {
       mainItem: "",
       mainItemQuantity: 1,
+      mainItemCalories: 0,
       secondaryItem: "",
       secondaryItemQuantity: 1,
+      secondaryItemCalories: 0,
       sideItem: "",
       sideItemQuantity: 1,
+      sideItemCalories: 0,
       price: 0,
       imageUrl: "",
       description: "",
@@ -61,10 +68,13 @@ export function MenuItemForm({ open, onOpenChange, onSubmit, initialData }: Menu
       form.reset({
         mainItem: initialData.mainItem ?? "",
         mainItemQuantity: initialData.mainItemQuantity ?? 1,
+        mainItemCalories: initialData.mainItemCalories ?? 0,
         secondaryItem: initialData.secondaryItem ?? "",
         secondaryItemQuantity: initialData.secondaryItemQuantity ?? 1,
+        secondaryItemCalories: initialData.secondaryItemCalories ?? 0,
         sideItem: initialData.sideItem ?? "",
         sideItemQuantity: initialData.sideItemQuantity ?? 1,
+        sideItemCalories: initialData.sideItemCalories ?? 0,
         price: initialData.price ?? 0,
         imageUrl: initialData.imageUrl ?? "",
         description: initialData.description ?? "",
@@ -76,10 +86,13 @@ export function MenuItemForm({ open, onOpenChange, onSubmit, initialData }: Menu
       form.reset({
         mainItem: "",
         mainItemQuantity: 1,
+        mainItemCalories: 0,
         secondaryItem: "",
         secondaryItemQuantity: 1,
+        secondaryItemCalories: 0,
         sideItem: "",
         sideItemQuantity: 1,
+        sideItemCalories: 0,
         price: 0,
         imageUrl: "",
         description: "",
@@ -96,7 +109,7 @@ export function MenuItemForm({ open, onOpenChange, onSubmit, initialData }: Menu
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[800px] max-h-[85vh] overflow-hidden overflow-y-scroll">
         <DialogHeader>
           <DialogTitle>{initialData ? "Edit Menu Item" : "Add Menu Item"}</DialogTitle>
         </DialogHeader>
@@ -129,6 +142,24 @@ export function MenuItemForm({ open, onOpenChange, onSubmit, initialData }: Menu
                         {...field} 
                         onChange={(e) => field.onChange(Number(e.target.value))}
                         required 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="mainItemCalories"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Main Item Calories</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number" 
+                        placeholder="Enter calories" 
+                        {...field} 
+                        onChange={(e) => field.onChange(Number(e.target.value))}
                       />
                     </FormControl>
                     <FormMessage />
@@ -182,6 +213,24 @@ export function MenuItemForm({ open, onOpenChange, onSubmit, initialData }: Menu
                   </FormItem>
                 )}
               />
+              <FormField
+                control={form.control}
+                name="secondaryItemCalories"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Secondary Item Calories</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number" 
+                        placeholder="Enter calories" 
+                        {...field} 
+                        onChange={(e) => field.onChange(Number(e.target.value))}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
@@ -210,6 +259,24 @@ export function MenuItemForm({ open, onOpenChange, onSubmit, initialData }: Menu
                         {...field} 
                         onChange={(e) => field.onChange(Number(e.target.value))}
                         required 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="sideItemCalories"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Side Item Calories</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number" 
+                        placeholder="Enter calories" 
+                        {...field} 
+                        onChange={(e) => field.onChange(Number(e.target.value))}
                       />
                     </FormControl>
                     <FormMessage />
@@ -277,6 +344,26 @@ export function MenuItemForm({ open, onOpenChange, onSubmit, initialData }: Menu
                     />
                   </FormControl>
                   <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="isActive"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                  <div className="space-y-0.5">
+                    <FormLabel className="text-base">Active Status</FormLabel>
+                    <div className="text-sm text-muted-foreground">
+                      Enable or disable this menu item
+                    </div>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
                 </FormItem>
               )}
             />

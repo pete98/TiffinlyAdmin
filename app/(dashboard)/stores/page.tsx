@@ -9,9 +9,10 @@ import { StoreTable } from "@/components/stores/store-table"
 import { StoreForm } from "@/components/stores/store-form"
 import { useToast } from "@/components/ui/use-toast"
 import { apiClient } from "@/lib/api"
+import { API_ENDPOINTS } from "@/lib/constants"
 
-const STORE_API = "https://b6b2efcf5d8d.ngrok-free.app/api/store"
-const KITCHEN_API = "https://b6b2efcf5d8d.ngrok-free.app/api/kitchen"
+  const STORE_API = API_ENDPOINTS.STORE
+  const KITCHEN_API = API_ENDPOINTS.KITCHEN
 
 export default function StoresPage() {
   const [isFormOpen, setIsFormOpen] = useState(false)

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { apiClient } from "@/lib/api"
+import { API_ENDPOINTS } from "@/lib/constants"
 import { toast } from "@/hooks/use-toast"
 
 export function BearerTokenTest() {
@@ -17,7 +18,7 @@ export function BearerTokenTest() {
     
     try {
       // Test with a simple API call that should include the bearer token
-      const result = await apiClient.get<any>("https://b6b2efcf5d8d.ngrok-free.app/api/kitchen")
+      const result = await apiClient.get<any>(`${API_ENDPOINTS.KITCHEN}`)
       
       // Handle different response structures
       let itemsCount = 0
