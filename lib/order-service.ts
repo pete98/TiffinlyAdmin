@@ -111,7 +111,8 @@ export class OrderService {
         order.customerEmail?.toLowerCase().includes(filters.search.toLowerCase()) ||
         order.deliveryAddress?.toLowerCase().includes(filters.search.toLowerCase()) ||
         order.status?.toLowerCase().includes(filters.search.toLowerCase()) ||
-        order.storeName?.toLowerCase().includes(filters.search.toLowerCase());
+        order.storeName?.toLowerCase().includes(filters.search.toLowerCase()) ||
+        order.orderNumber?.toLowerCase().includes(filters.search.toLowerCase());
 
       // Status filter
       const statusMatch = !filters.status || order.status === filters.status;
@@ -122,6 +123,9 @@ export class OrderService {
       // Subscription status filter
       const subscriptionStatusMatch = !filters.subscriptionStatus || order.subscriptionStatus === filters.subscriptionStatus;
 
+      // Store filter
+      const storeMatch = !filters.storeId || order.storeId === filters.storeId;
+
       // Date range filter
       let dateMatch = true;
       if (filters.dateRange) {
@@ -131,7 +135,7 @@ export class OrderService {
         dateMatch = orderDate >= startDate && orderDate <= endDate;
       }
 
-      return searchMatch && statusMatch && paymentStatusMatch && subscriptionStatusMatch && dateMatch;
+      return searchMatch && statusMatch && paymentStatusMatch && subscriptionStatusMatch && storeMatch && dateMatch;
     });
   }
 
@@ -167,6 +171,8 @@ export class OrderService {
       productType: item.productType || "menu_item_component",
       productName: item.productName || item.menuItemName || "Unknown Item",
       componentType: item.componentType,
+      // Handle new menuItemComponents field
+      menuItemComponents: item.menuItemComponents || undefined,
       // Handle legacy fields for backward compatibility
       menuItemId: item.menuItemId || item.productId,
       menuItemName: item.menuItemName || item.productName,

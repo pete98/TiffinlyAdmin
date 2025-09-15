@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Plus, Search, Filter, Download, RefreshCw, FileText, FileSpreadsheet } from "lucide-react"
+import { Plus, Search, Filter, Download, RefreshCw, FileText, FileSpreadsheet, Calendar, CheckCircle, Clock, XCircle, Truck, Package, Printer, CheckSquare } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { DashboardTitle } from "@/components/dashboard/dashboard-title"
@@ -28,6 +28,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Calendar as CalendarIcon } from "@/components/ui/calendar"
+import { format, subDays, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isToday, isYesterday, isThisWeek, isThisMonth } from "date-fns"
 
 export default function OrdersPage() {
   const [isFormOpen, setIsFormOpen] = useState(false)
@@ -41,11 +44,34 @@ export default function OrdersPage() {
     paymentStatus: undefined,
     subscriptionStatus: undefined,
     dateRange: undefined,
+    storeId: undefined,
   })
   const [showFilters, setShowFilters] = useState(false)
   const [stats, setStats] = useState<any>(null)
   const [exporting, setExporting] = useState(false)
   const { toast } = useToast()
+
+  // Quick date filter options
+  const quickDateOptions = [
+    { label: "Today", value: "today", getDates: () => ({ start: format(new Date(), "yyyy-MM-dd"), end: format(new Date(), "yyyy-MM-dd") }) },
+    { label: "Yesterday", value: "yesterday", getDates: () => ({ start: format(subDays(new Date(), 1), "yyyy-MM-dd"), end: format(subDays(new Date(), 1), "yyyy-MM-dd") }) },
+    { label: "This Week", value: "thisWeek", getDates: () => ({ start: format(startOfWeek(new Date(), { weekStartsOn: 1 }), "yyyy-MM-dd"), end: format(endOfWeek(new Date(), { weekStartsOn: 1 }), "yyyy-MM-dd") }) },
+    { label: "Last Week", value: "lastWeek", getDates: () => ({ start: format(startOfWeek(subDays(new Date(), 7), { weekStartsOn: 1 }), "yyyy-MM-dd"), end: format(endOfWeek(subDays(new Date(), 7), { weekStartsOn: 1 }), "yyyy-MM-dd") }) },
+    { label: "This Month", value: "thisMonth", getDates: () => ({ start: format(startOfMonth(new Date()), "yyyy-MM-dd"), end: format(endOfMonth(new Date()), "yyyy-MM-dd") }) },
+    { label: "Last Month", value: "lastMonth", getDates: () => ({ start: format(startOfMonth(subDays(new Date(), 30)), "yyyy-MM-dd"), end: format(endOfMonth(subDays(new Date(), 30)), "yyyy-MM-dd") }) },
+  ]
+
+  // Quick status filter options
+  const quickStatusOptions = [
+    { label: "All Orders", value: "all", icon: Package, color: "bg-gray-100 text-gray-700" },
+    { label: "Paid Orders", value: "paid", icon: CheckCircle, color: "bg-green-100 text-green-700" },
+    { label: "Pending Payment", value: "pending_payment", icon: Clock, color: "bg-yellow-100 text-yellow-700" },
+    { label: "Failed Payment", value: "failed_payment", icon: XCircle, color: "bg-red-100 text-red-700" },
+    { label: "Out for Delivery", value: "out_for_delivery", icon: Truck, color: "bg-blue-100 text-blue-700" },
+    { label: "Delivered", value: "delivered", icon: CheckCircle, color: "bg-green-100 text-green-700" },
+  ]
+
+
 
   // Fetch orders from backend
   const fetchOrders = async () => {
@@ -81,6 +107,11 @@ export default function OrdersPage() {
     const filtered = OrderService.filterOrders(orders, filters)
     setFilteredOrders(filtered)
   }, [orders, filters])
+
+  // Get unique stores for filtering
+  const uniqueStores = Array.from(new Set(orders.map(order => ({ id: order.storeId, name: order.storeName }))))
+    .filter((store, index, self) => self.findIndex(s => s.id === store.id) === index)
+    .sort((a, b) => a.name.localeCompare(b.name))
 
   const handleAddOrder = async (orderData: any) => {
     try {
@@ -214,6 +245,189 @@ export default function OrdersPage() {
     }
   }
 
+  // Print order labels for all filtered orders
+  const handlePrintOrderLabels = () => {
+    if (filteredOrders.length === 0) {
+      toast({
+        title: "No orders to print",
+        description: "There are no orders to print labels for.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    // Create a new window for printing
+    const printWindow = window.open('', '_blank')
+    if (!printWindow) {
+      toast({
+        title: "Print blocked",
+        description: "Please allow pop-ups to print order labels.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    // Generate simple receipt-style label HTML
+    const labelsHTML = filteredOrders.map(order => `
+      <div style="
+        page-break-inside: avoid;
+        margin: 10px;
+        padding: 15px;
+        border: 1px solid #000;
+        font-family: 'Courier New', monospace;
+        max-width: 300px;
+        background: white;
+        color: black;
+      ">
+        <div style="
+          text-align: center;
+          border-bottom: 1px solid #000;
+          padding-bottom: 8px;
+          margin-bottom: 10px;
+        ">
+          <h3 style="margin: 0; font-size: 14px; font-weight: bold;">
+            Tiffinly Order Pickup Receipt
+          </h3>
+        </div>
+        
+        <div style="margin-bottom: 10px; font-size: 12px;">
+          <div style="margin-bottom: 4px;">
+            <strong>Order:</strong> ${order.orderNumber || `#${order.id}`}
+          </div>
+          <div style="margin-bottom: 4px;">
+            <strong>Customer:</strong> ${order.customerName || 'N/A'}
+          </div>
+          <div style="margin-bottom: 4px;">
+            <strong>Store:</strong> ${order.storeName || 'N/A'}
+          </div>
+        </div>
+
+        <div style="
+          border-top: 1px solid #000;
+          border-bottom: 1px solid #000;
+          padding: 8px 0;
+          margin-bottom: 10px;
+        ">
+          <div style="margin-bottom: 4px; font-weight: bold;">ITEMS:</div>
+          ${order.items?.map(item => {
+            if (item.menuItemComponents && item.menuItemComponents.length > 0) {
+              // Display each menu item component separately
+              return item.menuItemComponents.map(component => `
+                <div style="
+                  display: flex;
+                  justify-content: space-between;
+                  margin-bottom: 2px;
+                  font-size: 11px;
+                ">
+                  <span>${component.itemName}</span>
+                  <span>x${component.quantity}</span>
+                </div>
+              `).join('')
+            } else {
+              // Display regular item
+              return `
+                <div style="
+                  display: flex;
+                  justify-content: space-between;
+                  margin-bottom: 2px;
+                  font-size: 11px;
+                ">
+                  <span>${item.menuItemName || item.productName || 'N/A'}</span>
+                  <span>x${item.quantity}</span>
+                </div>
+              `
+            }
+          }).join('') || 'No items'}
+        </div>
+
+        <div style="
+          text-align: center;
+          font-size: 10px;
+          color: #666;
+        ">
+          Ready for pickup
+        </div>
+      </div>
+    `).join('')
+
+    // Set the print window content
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Order Labels - ${filteredOrders.length} Orders</title>
+          <style>
+            @media print {
+              body { margin: 0; }
+              div { page-break-inside: avoid; }
+            }
+            body { 
+              font-family: 'Courier New', monospace; 
+              background: white;
+              color: black;
+            }
+          </style>
+        </head>
+        <body>
+          ${labelsHTML}
+          <script>
+            window.onload = function() {
+              window.print();
+              window.close();
+            }
+          </script>
+        </body>
+      </html>
+    `)
+    printWindow.document.close()
+
+    toast({
+      title: "Print labels",
+      description: `Preparing to print ${filteredOrders.length} order labels.`,
+    })
+  }
+
+  // Confirm all filtered orders (mark as ready for pickup)
+  const handleConfirmAllOrders = async () => {
+    if (filteredOrders.length === 0) {
+      toast({
+        title: "No orders to confirm",
+        description: "There are no orders to confirm.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    if (!confirm(`Are you sure you want to mark ${filteredOrders.length} orders as ready for pickup?`)) {
+      return
+    }
+
+    setLoading(true)
+    try {
+      // Update all filtered orders to ready for pickup status
+      const updatePromises = filteredOrders.map(order => 
+        OrderService.updateOrderStatus(order.id, "READY_FOR_PICKUP")
+      )
+      
+      await Promise.all(updatePromises)
+      
+      toast({
+        title: "Orders ready for pickup",
+        description: `Successfully marked ${filteredOrders.length} orders as ready for pickup.`,
+      })
+      
+      await fetchOrders()
+    } catch (err: any) {
+      toast({
+        title: "Error updating orders",
+        description: err.message || "Failed to update some orders. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const clearFilters = () => {
     setFilters({
       search: "",
@@ -221,7 +435,65 @@ export default function OrdersPage() {
       paymentStatus: undefined,
       subscriptionStatus: undefined,
       dateRange: undefined,
+      storeId: undefined,
     })
+  }
+
+  const applyQuickDateFilter = (option: string) => {
+    const selectedOption = quickDateOptions.find(opt => opt.value === option)
+    if (selectedOption) {
+      setFilters(prev => ({
+        ...prev,
+        dateRange: selectedOption.getDates()
+      }))
+    }
+  }
+
+  const applyQuickStatusFilter = (option: string) => {
+    switch (option) {
+      case "paid":
+        setFilters(prev => ({
+          ...prev,
+          paymentStatus: "PAID",
+          status: undefined
+        }))
+        break
+      case "pending_payment":
+        setFilters(prev => ({
+          ...prev,
+          paymentStatus: "PENDING",
+          status: undefined
+        }))
+        break
+      case "failed_payment":
+        setFilters(prev => ({
+          ...prev,
+          paymentStatus: "FAILED",
+          status: undefined
+        }))
+        break
+      case "out_for_delivery":
+        setFilters(prev => ({
+          ...prev,
+          status: "OUT_FOR_DELIVERY",
+          paymentStatus: undefined
+        }))
+        break
+      case "delivered":
+        setFilters(prev => ({
+          ...prev,
+          status: "DELIVERED",
+          paymentStatus: undefined
+        }))
+        break
+      case "all":
+        setFilters(prev => ({
+          ...prev,
+          status: undefined,
+          paymentStatus: undefined
+        }))
+        break
+    }
   }
 
   const formatCurrency = (amount: number) => {
@@ -248,6 +520,17 @@ export default function OrdersPage() {
     }
     
     return filename
+  }
+
+  const getActiveQuickFilters = () => {
+    const activeFilters = []
+    if (filters.paymentStatus === "PAID") activeFilters.push("paid")
+    if (filters.paymentStatus === "PENDING") activeFilters.push("pending_payment")
+    if (filters.paymentStatus === "FAILED") activeFilters.push("failed_payment")
+    if (filters.status === "OUT_FOR_DELIVERY") activeFilters.push("out_for_delivery")
+    if (filters.status === "DELIVERED") activeFilters.push("delivered")
+    if (!filters.status && !filters.paymentStatus) activeFilters.push("all")
+    return activeFilters
   }
 
   return (
@@ -318,15 +601,103 @@ export default function OrdersPage() {
         </div>
       )}
 
-      {/* Search and Filters */}
+      {/* Quick Status Filters */}
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex flex-wrap gap-2">
+            {quickStatusOptions.map((option) => {
+              const Icon = option.icon
+              const isActive = getActiveQuickFilters().includes(option.value)
+              return (
+                <Button
+                  key={option.value}
+                  variant={isActive ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => applyQuickStatusFilter(option.value)}
+                  className={`flex items-center gap-2 ${isActive ? option.color : ""}`}
+                >
+                  <Icon className="h-4 w-4" />
+                  {option.label}
+                </Button>
+              )
+            })}
+          </div>
+        </CardContent>
+      </Card>
+
+
+
+      {/* Quick Date Filters */}
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex items-center gap-4 mb-4">
+            <h3 className="text-sm font-medium text-muted-foreground">Quick Date Filters:</h3>
+            <div className="flex flex-wrap gap-2">
+              {quickDateOptions.map((option) => {
+                const isActive = filters.dateRange?.start === option.getDates().start && 
+                               filters.dateRange?.end === option.getDates().end
+                return (
+                  <Button
+                    key={option.value}
+                    variant={isActive ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => applyQuickDateFilter(option.value)}
+                  >
+                    {option.label}
+                  </Button>
+                )
+              })}
+            </div>
+          </div>
+          
+          {/* Custom Date Range */}
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium text-muted-foreground">Custom Range:</span>
+            </div>
+            <div className="flex gap-2">
+              <Input
+                type="date"
+                placeholder="Start date"
+                value={filters.dateRange?.start || ""}
+                onChange={(e) => setFilters({
+                  ...filters,
+                  dateRange: {
+                    start: e.target.value,
+                    end: filters.dateRange?.end || ""
+                  }
+                })}
+                className="w-40"
+              />
+              <span className="text-muted-foreground">to</span>
+              <Input
+                type="date"
+                placeholder="End date"
+                value={filters.dateRange?.end || ""}
+                onChange={(e) => setFilters({
+                  ...filters,
+                  dateRange: {
+                    start: filters.dateRange?.start || "",
+                    end: e.target.value
+                  }
+                })}
+                className="w-40"
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Search and Advanced Filters */}
       <Card>
         <CardContent className="p-4">
           <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
-            <div className="flex-1 max-w-md">
+            <div className="flex-1">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                 <Input
-                  placeholder="Search orders by customer, phone, email, address, status, or store..."
+                  placeholder="Search orders by order number, customer, phone, email, address, status, or store..."
                   value={filters.search}
                   onChange={(e) => setFilters({ ...filters, search: e.target.value })}
                   className="pl-10"
@@ -335,21 +706,38 @@ export default function OrdersPage() {
             </div>
             
             <div className="flex gap-2">
+              <Select
+                value={filters.storeId?.toString() || "all"}
+                onValueChange={(value) => setFilters({ ...filters, storeId: value === "all" ? undefined : parseInt(value) })}
+              >
+                <SelectTrigger className="w-48">
+                  <SelectValue placeholder="All Stores" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Stores</SelectItem>
+                  {uniqueStores.map((store) => (
+                    <SelectItem key={store.id} value={store.id.toString()}>
+                      {store.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              
               <Button
                 variant="outline"
                 onClick={() => setShowFilters(!showFilters)}
                 className="flex items-center gap-2"
               >
                 <Filter className="h-4 w-4" />
-                Filters
+                Advanced Filters
               </Button>
               
               <Button
                 variant="outline"
                 onClick={clearFilters}
-                disabled={!filters.search && !filters.status && !filters.paymentStatus && !filters.subscriptionStatus && !filters.dateRange}
+                disabled={!filters.search && !filters.status && !filters.paymentStatus && !filters.subscriptionStatus && !filters.dateRange && !filters.storeId}
               >
-                Clear
+                Clear All
               </Button>
               
               <Button
@@ -392,6 +780,7 @@ export default function OrdersPage() {
                       <SelectItem value="PENDING">Pending</SelectItem>
                       <SelectItem value="CONFIRMED">Confirmed</SelectItem>
                       <SelectItem value="PREPARING">Preparing</SelectItem>
+                      <SelectItem value="READY_FOR_PICKUP">Ready for Pickup</SelectItem>
                       <SelectItem value="OUT_FOR_DELIVERY">Out for Delivery</SelectItem>
                       <SelectItem value="DELIVERED">Delivered</SelectItem>
                       <SelectItem value="CANCELLED">Cancelled</SelectItem>
@@ -439,37 +828,7 @@ export default function OrdersPage() {
                   </Select>
                 </div>
 
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground mb-2 block">
-                    Date Range
-                  </label>
-                  <div className="grid grid-cols-2 gap-2">
-                    <Input
-                      type="date"
-                      placeholder="Start date"
-                      value={filters.dateRange?.start || ""}
-                      onChange={(e) => setFilters({
-                        ...filters,
-                        dateRange: {
-                          start: e.target.value,
-                          end: filters.dateRange?.end || ""
-                        }
-                      })}
-                    />
-                    <Input
-                      type="date"
-                      placeholder="End date"
-                      value={filters.dateRange?.end || ""}
-                      onChange={(e) => setFilters({
-                        ...filters,
-                        dateRange: {
-                          start: filters.dateRange?.start || "",
-                          end: e.target.value
-                        }
-                      })}
-                    />
-                  </div>
-                </div>
+
               </div>
             </div>
           )}
@@ -481,9 +840,32 @@ export default function OrdersPage() {
         <span>
           Showing {filteredOrders.length} of {orders.length} orders
           {filters.search && ` matching "${filters.search}"`}
+          {filters.dateRange?.start && filters.dateRange?.end && ` from ${filters.dateRange.start} to ${filters.dateRange.end}`}
+          {filters.paymentStatus && ` with ${filters.paymentStatus.toLowerCase()} payment`}
+          {filters.status && ` with ${filters.status.toLowerCase()} status`}
+          {filters.storeId && ` from store "${orders.find(o => o.storeId === filters.storeId)?.storeName || 'Unknown'}"`}
         </span>
         {filteredOrders.length > 0 && (
           <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={handlePrintOrderLabels}
+              className="flex items-center gap-2"
+            >
+              <Printer className="mr-2 h-4 w-4" />
+              Print Order Labels
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={handleConfirmAllOrders}
+              disabled={loading}
+              className="flex items-center gap-2"
+            >
+              <CheckSquare className="mr-2 h-4 w-4" />
+                              {loading ? "Updating..." : "Mark All Ready for Pickup"}
+            </Button>
             <Button 
               variant="outline" 
               size="sm"

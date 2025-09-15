@@ -24,6 +24,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { Order, OrderItem } from "@/lib/types"
+import { MenuItemComponentsDisplay } from "./menu-item-components-display"
 
 interface OrderTableProps {
   orders: Order[]
@@ -50,6 +51,12 @@ const statusConfig = {
     color: "bg-orange-100 text-orange-800 border-orange-200",
     icon: TrendingUp,
     description: "Food is being prepared in the kitchen"
+  },
+  READY_FOR_PICKUP: {
+    label: "Ready for Pickup",
+    color: "bg-green-100 text-green-800 border-green-200",
+    icon: CheckCircle,
+    description: "Order is ready for customer pickup"
   },
   OUT_FOR_DELIVERY: {
     label: "Out for Delivery",
@@ -102,17 +109,54 @@ export function OrderTable({ orders, onEdit, onDelete, onStatusUpdate }: OrderTa
         if (isNaN(order.chargedAmount)) {
           console.warn(`Order ${order.id} has NaN chargedAmount:`, order)
         }
+        // Log menu item components for debugging
+        order.items.forEach(item => {
+          if (item.menuItemComponents && item.menuItemComponents.length > 0) {
+            console.log(`Order ${order.id} has menuItemComponents:`, item.menuItemComponents)
+          }
+        })
       })
     }
   }, [orders])
 
   const formatDate = (dateString: string) => {
+    // Check if this is a date-only string (YYYY-MM-DD format)
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+      // For date-only strings, treat as local date to avoid timezone issues
+      const [year, month, day] = dateString.split('-').map(Number)
+      return new Date(year, month - 1, day).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric"
+      })
+    }
+    
+    // For datetime strings, use the original logic
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
       hour: "2-digit",
       minute: "2-digit"
+    })
+  }
+
+  const formatDateOnly = (dateString: string) => {
+    // For date-only strings, treat as local date to avoid timezone issues
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+      const [year, month, day] = dateString.split('-').map(Number)
+      return new Date(year, month - 1, day).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric"
+      })
+    }
+    
+    // For datetime strings, extract just the date part
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric"
     })
   }
 
@@ -168,6 +212,7 @@ export function OrderTable({ orders, onEdit, onDelete, onStatusUpdate }: OrderTa
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-20">Order ID</TableHead>
+                  <TableHead className="w-32">Order Number</TableHead>
                   <TableHead className="w-48">Customer</TableHead>
                   <TableHead className="w-40">Store</TableHead>
                   <TableHead className="w-56">Items</TableHead>
@@ -184,10 +229,20 @@ export function OrderTable({ orders, onEdit, onDelete, onStatusUpdate }: OrderTa
                   <TableRow key={order.id} className="hover:bg-muted/50">
                     <TableCell className="font-medium">#{order.id}</TableCell>
                     <TableCell>
+                      <div className="font-mono text-sm">
+                        {order.orderNumber ? (
+                          <Badge variant="outline" className="text-xs">
+                            {order.orderNumber}
+                          </Badge>
+                        ) : (
+                          <span className="text-muted-foreground text-xs">N/A</span>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
                       <div>
                         <div className="font-medium">{order.customerName}</div>
                         <div className="text-sm text-muted-foreground">{order.customerPhone}</div>
-                        <div className="text-xs text-muted-foreground">{order.customerEmail}</div>
                       </div>
                     </TableCell>
                     <TableCell>
@@ -200,11 +255,20 @@ export function OrderTable({ orders, onEdit, onDelete, onStatusUpdate }: OrderTa
                       </div>
                       <div className="text-xs text-muted-foreground">
                         {order.items.slice(0, 2).map(item => {
-                          if (item.productType === "menu_item_component") {
+                          if (item.menuItemComponents && item.menuItemComponents.length > 0) {
+                            // Display menu item components using the new component
+                            return (
+                              <MenuItemComponentsDisplay 
+                                key={item.id} 
+                                components={item.menuItemComponents} 
+                                compact={true}
+                              />
+                            );
+                          } else if (item.productType === "menu_item_component") {
                             return `${item.productName} (${item.componentType || "component"})`;
                           }
                           return item.productName || item.menuItemName || "Unknown Item";
-                        }).join(", ")}
+                        })}
                         {order.items.length > 2 && "..."}
                       </div>
                     </TableCell>
@@ -246,7 +310,7 @@ export function OrderTable({ orders, onEdit, onDelete, onStatusUpdate }: OrderTa
                         {paymentStatusConfig[order.paymentStatus].label}
                       </Badge>
                     </TableCell>
-                    <TableCell>{formatDate(order.orderDate)}</TableCell>
+                    <TableCell>{formatDate(order.createdAt)}</TableCell>
                     <TableCell className="text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -339,10 +403,6 @@ export function OrderTable({ orders, onEdit, onDelete, onStatusUpdate }: OrderTa
                       <p className="font-medium">{selectedOrder.customerPhone}</p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-muted-foreground">Email</label>
-                      <p className="font-medium">{selectedOrder.customerEmail}</p>
-                    </div>
-                    <div>
                       <label className="text-sm font-medium text-muted-foreground">Delivery Address</label>
                       <p className="font-medium">{selectedOrder.deliveryAddress}</p>
                     </div>
@@ -375,7 +435,6 @@ export function OrderTable({ orders, onEdit, onDelete, onStatusUpdate }: OrderTa
                     <TableHeader>
                       <TableRow>
                         <TableHead>Item</TableHead>
-                        <TableHead>Type</TableHead>
                         <TableHead>Quantity</TableHead>
                         <TableHead>Unit Price</TableHead>
                         <TableHead>Pro Included</TableHead>
@@ -387,19 +446,44 @@ export function OrderTable({ orders, onEdit, onDelete, onStatusUpdate }: OrderTa
                       {selectedOrder.items.map((item) => (
                         <TableRow key={item.id}>
                           <TableCell className="font-medium">
-                            {item.productName || item.menuItemName || "Unknown Item"}
-                            {item.componentType && (
-                              <div className="text-xs text-muted-foreground">
-                                ({item.componentType})
+                            {item.menuItemComponents && item.menuItemComponents.length > 0 ? (
+                              // Display only the components, not the concatenated name
+                              <div className="space-y-1">
+                                {item.menuItemComponents.map((comp, index) => (
+                                  <div key={index} className="text-sm">
+                                    {comp.itemName}
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              // For regular items without components
+                              <div>
+                                <div className="font-medium">{item.productName || item.menuItemName || "Unknown Item"}</div>
+                                {item.componentType && (
+                                  <div className="mt-1">
+                                    <Badge variant="outline" className="text-xs px-2 py-0.5 bg-gray-100 text-gray-700 border-gray-200">
+                                      {item.componentType === "main" ? "Main" : item.componentType === "side" ? "Side" : "Dessert"}
+                                    </Badge>
+                                  </div>
+                                )}
                               </div>
                             )}
                           </TableCell>
                           <TableCell>
-                            <Badge variant="outline" className="text-xs">
-                              {item.productType === "menu_item_component" ? "Menu Item" : "Add-on"}
-                            </Badge>
+                            {item.menuItemComponents && item.menuItemComponents.length > 0 ? (
+                              // Show component quantities in the Quantity column with proper alignment
+                              <div className="space-y-1">
+                                {item.menuItemComponents.map((comp, index) => (
+                                  <div key={index} className="text-sm text-center">
+                                    x{comp.quantity}
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              // For regular items, show the item quantity
+                              <span className="font-medium">{item.quantity}</span>
+                            )}
                           </TableCell>
-                          <TableCell>{item.quantity}</TableCell>
                           <TableCell>{formatCurrency(item.unitPrice)}</TableCell>
                           <TableCell>
                             <Badge className={`${item.isProIncluded ? "bg-green-100 text-green-800 border-green-200" : "bg-gray-100 text-gray-800 border-gray-200"} border`}>
@@ -450,11 +534,11 @@ export function OrderTable({ orders, onEdit, onDelete, onStatusUpdate }: OrderTa
                     <div className="space-y-4">
                       <div>
                         <label className="text-sm font-medium text-muted-foreground">Order Date</label>
-                        <p className="font-medium">{formatDate(selectedOrder.orderDate)}</p>
+                        <p className="font-medium">{formatDate(selectedOrder.createdAt)}</p>
                       </div>
                       <div>
                         <label className="text-sm font-medium text-muted-foreground">Delivery Date</label>
-                        <p className="font-medium">{formatDate(selectedOrder.deliveryDate)}</p>
+                        <p className="font-medium">{formatDateOnly(selectedOrder.deliveryDate)}</p>
                       </div>
                       <div>
                         <label className="text-sm font-medium text-muted-foreground">Payment Method</label>

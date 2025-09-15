@@ -20,6 +20,7 @@ export function exportOrdersToCSV(orders: any[], filename: string = "orders") {
   // Define CSV headers for main orders
   const headers = [
     "Order ID",
+    "Order Number",
     "Customer Name",
     "Customer Phone",
     "Customer Email",
@@ -45,6 +46,7 @@ export function exportOrdersToCSV(orders: any[], filename: string = "orders") {
   orders.forEach(order => {
     const row = [
       order.id,
+      order.orderNumber || "",
       `"${(order.customerName || "").replace(/"/g, '""')}"`,
       order.customerPhone || "",
       order.customerEmail || "",
@@ -102,6 +104,7 @@ export async function exportOrdersToExcel(orders: any[], filename: string = "ord
     // Prepare data for Excel - Main orders sheet
     const ordersData = orders.map(order => ({
       "Order ID": order.id,
+      "Order Number": order.orderNumber || "",
       "Customer Name": order.customerName || "",
       "Customer Phone": order.customerPhone || "",
       "Customer Email": order.customerEmail || "",
@@ -126,21 +129,43 @@ export async function exportOrdersToExcel(orders: any[], filename: string = "ord
     orders.forEach(order => {
       if (order.items && order.items.length > 0) {
         order.items.forEach((item: any) => {
-          itemsData.push({
-            "Order ID": order.id,
-            "Customer Name": order.customerName || "",
-            "Item ID": item.id,
-            "Product Name": item.productName || item.menuItemName || "",
-            "Product Type": item.productType || "",
-            "Component Type": item.componentType || "",
-            "Quantity": item.quantity || 0,
-            "Unit Price": item.unitPrice || 0,
-            "Total Price": item.totalPrice || item.subtotal || 0,
-            "Charged Amount": item.chargedAmount || 0,
-            "Pro Included": item.isProIncluded ? "Yes" : "No",
-            "Order Date": order.orderDate || "",
-            "Order Status": order.status || ""
-          })
+          if (item.menuItemComponents && item.menuItemComponents.length > 0) {
+            // Create separate rows for each menu item component
+            item.menuItemComponents.forEach((comp: any) => {
+              itemsData.push({
+                "Order ID": order.id,
+                "Customer": order.customerName,
+                "Store": order.storeName,
+                "Item Name": comp.itemName,
+                "Item Type": comp.itemType,
+                "Component Type": item.productType,
+                "Quantity": comp.quantity,
+                "Unit Price": item.unitPrice,
+                "Total Price": item.totalPrice,
+                "Charged Amount": item.chargedAmount,
+                "Pro Included": item.isProIncluded ? "Yes" : "No",
+                "Order Status": order.status || "",
+                "Payment Status": order.paymentStatus || ""
+              })
+            })
+          } else {
+            // Regular item
+            itemsData.push({
+              "Order ID": order.id,
+              "Customer": order.customerName,
+              "Store": order.storeName,
+              "Item Name": item.productName || item.menuItemName || "",
+              "Item Type": item.componentType || "",
+              "Component Type": item.productType || "",
+              "Quantity": item.quantity,
+              "Unit Price": item.unitPrice,
+              "Total Price": item.totalPrice || item.subtotal,
+              "Charged Amount": item.chargedAmount,
+              "Pro Included": item.isProIncluded ? "Yes" : "No",
+              "Order Status": order.status || "",
+              "Payment Status": order.paymentStatus || ""
+            })
+          }
         })
       }
     })
@@ -198,6 +223,9 @@ export function exportDetailedOrdersToCSV(orders: any[], filename: string = "det
   orders.forEach(order => {
     // Add order header
     csvRows.push(`Order #${order.id} - ${order.customerName}`)
+    if (order.orderNumber) {
+      csvRows.push(`Order Number: ${order.orderNumber}`)
+    }
     csvRows.push(`Customer: ${order.customerName}, Phone: ${order.customerPhone}, Email: ${order.customerEmail}`)
     csvRows.push(`Address: ${order.deliveryAddress}`)
     csvRows.push(`Store: ${order.storeName}`)
@@ -214,7 +242,15 @@ export function exportDetailedOrdersToCSV(orders: any[], filename: string = "det
       csvRows.push("Items:")
       csvRows.push("Name,Type,Component,Quantity,Unit Price,Total Price,Charged,Pro Included")
       order.items.forEach((item: any) => {
-        csvRows.push(`"${item.productName || item.menuItemName || ""}","${item.productType || ""}","${item.componentType || ""}",${item.quantity},${item.unitPrice},${item.totalPrice || item.subtotal},${item.chargedAmount},${item.isProIncluded ? "Yes" : "No"}`)
+        if (item.menuItemComponents && item.menuItemComponents.length > 0) {
+          // Export each menu item component separately
+          item.menuItemComponents.forEach((comp: any) => {
+            csvRows.push(`"${comp.itemName}","${item.productType || ""}","${comp.itemType || ""}",${comp.quantity},${item.unitPrice},${item.totalPrice || item.subtotal},${item.chargedAmount},${item.isProIncluded ? "Yes" : "No"}`)
+          })
+        } else {
+          // Export regular item
+          csvRows.push(`"${item.productName || item.menuItemName || ""}","${item.productType || ""}","${item.componentType || ""}",${item.quantity},${item.unitPrice},${item.totalPrice || item.subtotal},${item.chargedAmount},${item.isProIncluded ? "Yes" : "No"}`)
+        }
       })
     }
     

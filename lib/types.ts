@@ -42,6 +42,12 @@ export interface MenuItemFormValues {
   nutritionFacts?: NutritionFacts;
 }
 
+export interface MenuItemComponent {
+  itemName: string;
+  quantity: number;
+  itemType: "main" | "secondary" | "side";
+}
+
 // Order Management Types - Updated to match actual API response
 export interface OrderItem {
   id: number;
@@ -54,6 +60,8 @@ export interface OrderItem {
   totalPrice: number;
   chargedAmount: number;
   isProIncluded: boolean;
+  // New field for menu item components
+  menuItemComponents?: MenuItemComponent[];
   // Legacy fields for backward compatibility
   menuItemId?: number;
   menuItemName?: string;
@@ -63,6 +71,7 @@ export interface OrderItem {
 
 export interface Order {
   id: number;
+  orderNumber: string;
   customerName: string;
   customerPhone: string;
   customerEmail: string;
@@ -72,7 +81,7 @@ export interface Order {
   subtotal: number;
   chargedAmount: number;
   subscriptionStatus: "active" | "inactive" | "expired";
-  status: "PENDING" | "CONFIRMED" | "PREPARING" | "OUT_FOR_DELIVERY" | "DELIVERED" | "CANCELLED";
+  status: "PENDING" | "CONFIRMED" | "PREPARING" | "READY_FOR_PICKUP" | "OUT_FOR_DELIVERY" | "DELIVERED" | "CANCELLED";
   orderDate: string;
   deliveryDate: string;
   paymentMethod: "cash" | "card" | "upi";
@@ -96,7 +105,7 @@ export interface OrderFormData {
   deliveryDate: string;
   paymentMethod: "cash" | "card" | "upi";
   paymentStatus: "PENDING" | "PAID" | "FAILED";
-  status: "PENDING" | "CONFIRMED" | "PREPARING" | "OUT_FOR_DELIVERY" | "DELIVERED" | "CANCELLED";
+  status: "PENDING" | "CONFIRMED" | "PREPARING" | "READY_FOR_PICKUP" | "OUT_FOR_DELIVERY" | "DELIVERED" | "CANCELLED";
   notes?: string;
   items: OrderItem[];
   totalAmount: number;
@@ -108,6 +117,7 @@ export interface OrderFormData {
   storeAddress?: string;
   storeHours?: string;
   fulfillmentMode?: "PICKUP" | "DELIVERY";
+  orderNumber?: string;
   store?: {
     id: number;
     name: string;
@@ -124,6 +134,7 @@ export interface OrderFilters {
     start: string;
     end: string;
   };
+  storeId?: number;
 } 
 
 // User Management Types - Updated to match new API format

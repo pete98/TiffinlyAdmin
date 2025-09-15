@@ -61,7 +61,7 @@ export function OrderStats({ orders }: OrderStatsProps) {
     // Recent orders (last 7 days)
     const sevenDaysAgo = new Date()
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
-    const recentOrders = orders.filter(order => new Date(order.orderDate) >= sevenDaysAgo)
+    const recentOrders = orders.filter(order => new Date(order.createdAt) >= sevenDaysAgo)
     const recentRevenue = recentOrders.reduce((sum, order) => sum + order.totalAmount, 0)
 
     // Top customers

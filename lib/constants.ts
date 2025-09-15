@@ -1,5 +1,5 @@
 // API Configuration
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://3a19295b5657.ngrok-free.app';
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 // API Endpoints
 export const API_ENDPOINTS = {

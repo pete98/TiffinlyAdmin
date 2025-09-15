@@ -46,11 +46,11 @@ const orderSchema = z.object({
   deliveryDate: z.string().min(1, "Delivery date is required"),
   paymentMethod: z.enum(["cash", "card", "upi"]),
   paymentStatus: z.enum(["PENDING", "PAID", "FAILED"]),
-  status: z.enum(["PENDING", "CONFIRMED", "PREPARING", "OUT_FOR_DELIVERY", "DELIVERED", "CANCELLED"]),
+  status: z.enum(["PENDING", "CONFIRMED", "PREPARING", "READY_FOR_PICKUP", "OUT_FOR_DELIVERY", "DELIVERED", "CANCELLED"]),
   subscriptionStatus: z.enum(["active", "inactive", "expired"]),
   notes: z.string().optional(),
   storeId: z.number().min(1, "Store selection is required"),
-  fulfillmentMode: z.enum(["PICKUP", "DELIVERY"]).default("DELIVERY"),
+  fulfillmentMode: z.enum(["PICKUP", "DELIVERY"]).optional(),
 })
 
 interface OrderFormProps {
@@ -135,41 +135,35 @@ export function OrderForm({ open, onOpenChange, onSubmit, initialData }: OrderFo
         customerPhone: initialData.customerPhone,
         customerEmail: initialData.customerEmail,
         deliveryAddress: initialData.deliveryAddress,
-        orderDate: initialData.orderDate.split("T")[0],
-        deliveryDate: initialData.deliveryDate.split("T")[0],
+        orderDate: initialData.orderDate,
+        deliveryDate: initialData.deliveryDate,
         paymentMethod: initialData.paymentMethod,
         paymentStatus: initialData.paymentStatus,
         status: initialData.status,
         subscriptionStatus: initialData.subscriptionStatus,
         notes: initialData.notes || "",
         storeId: initialData.storeId,
-        fulfillmentMode: initialData.fulfillmentMode,
+        fulfillmentMode: initialData.fulfillmentMode || "DELIVERY",
       })
+
+      // Transform items to match the form structure
+      const transformedItems = initialData.items.map(item => ({
+        ...item,
+        // Handle new menuItemComponents structure
+        productId: item.productId || item.menuItemId || 0,
+        productName: item.productName || item.menuItemName || "",
+        unitPrice: item.unitPrice || item.price || 0,
+        totalPrice: item.totalPrice || item.subtotal || 0,
+        chargedAmount: item.chargedAmount || 0,
+        subtotal: item.subtotal || item.totalPrice || 0,
+        price: item.price || item.unitPrice || 0,
+        // Preserve menuItemComponents for display purposes
+        menuItemComponents: item.menuItemComponents,
+      }))
       
-      // Ensure all required fields are properly set for order items
-      const processedItems = initialData.items.map(item => {
-        const price = Number(item.price) || 0
-        const quantity = Number(item.quantity) || 0
-        const subtotal = Number(item.subtotal) || (price * quantity)
-        const unitPrice = Number(item.unitPrice) || price
-        const totalPrice = Number(item.totalPrice) || subtotal
-        const chargedAmount = Number(item.chargedAmount) || (item.isProIncluded ? 0 : subtotal)
-        
-        return {
-          ...item,
-          price,
-          quantity,
-          subtotal,
-          unitPrice,
-          totalPrice,
-          chargedAmount,
-          isProIncluded: Boolean(item.isProIncluded),
-        }
-      })
-      
-      console.log('Processed items:', processedItems) // Debug log
-      setSelectedItems(processedItems)
+      setSelectedItems(transformedItems)
     } else {
+      // Reset form for new order
       form.reset({
         customerName: "",
         customerPhone: "",
@@ -353,7 +347,18 @@ export function OrderForm({ open, onOpenChange, onSubmit, initialData }: OrderFo
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            {initialData ? "Edit Order" : "Create New Order"}
+            {initialData ? (
+              <div className="flex items-center gap-2">
+                <span>Edit Order #{initialData.id}</span>
+                {initialData.orderNumber && (
+                  <Badge variant="outline" className="text-xs font-mono">
+                    {initialData.orderNumber}
+                  </Badge>
+                )}
+              </div>
+            ) : (
+              "Create New Order"
+            )}
             {selectedItems.length > 0 && (
               <Badge variant="secondary" className="ml-auto">
                 Total: ${calculateTotal().toFixed(2)}
@@ -586,7 +591,7 @@ export function OrderForm({ open, onOpenChange, onSubmit, initialData }: OrderFo
                             <div className="text-right">
                               <div className="text-sm text-muted-foreground">Subtotal</div>
                               <div className="text-lg font-semibold text-primary">
-                                ${item.subtotal.toFixed(2)}
+                                ${(item.subtotal || 0).toFixed(2)}
                               </div>
                               {item.isProIncluded && (
                                 <div className="text-xs text-green-600">Pro: $0.00</div>
@@ -600,12 +605,31 @@ export function OrderForm({ open, onOpenChange, onSubmit, initialData }: OrderFo
                               variant="ghost"
                               size="sm"
                               onClick={() => handleRemoveItem(index)}
-                              className="text-red-600 hover:text-red-700"
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
                         </div>
+                        
+                        {/* Display menu item components if they exist */}
+                        {item.menuItemComponents && item.menuItemComponents.length > 0 && (
+                          <div className="mt-3 pt-3 border-t">
+                            <div className="text-sm font-medium text-muted-foreground mb-2">
+                              Menu Item Components:
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                              {item.menuItemComponents.map((comp, compIndex) => (
+                                <div key={compIndex} className="text-xs bg-muted p-2 rounded">
+                                  <div className="font-medium">{comp.itemName}</div>
+                                  <div className="text-muted-foreground">
+                                    {comp.itemType} • Qty: {comp.quantity}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     ))}
 

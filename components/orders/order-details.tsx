@@ -41,6 +41,12 @@ const statusConfig = {
     icon: Package,
     description: "Food is being prepared in the kitchen"
   },
+  READY_FOR_PICKUP: {
+    label: "Ready for Pickup",
+    color: "bg-green-100 text-green-800 border-green-200",
+    icon: CheckCircle,
+    description: "Order is ready for customer pickup"
+  },
   OUT_FOR_DELIVERY: {
     label: "Out for Delivery",
     color: "bg-purple-100 text-purple-800 border-purple-200",
@@ -83,12 +89,43 @@ export function OrderDetails({ order, onEdit, onStatusUpdate }: OrderDetailsProp
   const [selectedStatus, setSelectedStatus] = useState<Order["status"] | null>(null)
 
   const formatDate = (dateString: string) => {
+    // Check if this is a date-only string (YYYY-MM-DD format)
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+      // For date-only strings, treat as local date to avoid timezone issues
+      const [year, month, day] = dateString.split('-').map(Number)
+      return new Date(year, month - 1, day).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+      })
+    }
+    
+    // For datetime strings, use the original logic
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
       day: "numeric",
       hour: "2-digit",
       minute: "2-digit"
+    })
+  }
+
+  const formatDateOnly = (dateString: string) => {
+    // For date-only strings, treat as local date to avoid timezone issues
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+      const [year, month, day] = dateString.split('-').map(Number)
+      return new Date(year, month - 1, day).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+      })
+    }
+    
+    // For datetime strings, extract just the date part
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric"
     })
   }
 
@@ -117,7 +154,8 @@ export function OrderDetails({ order, onEdit, onStatusUpdate }: OrderDetailsProp
     const timeline = [
       { status: "PENDING", label: "Order Placed", completed: true },
       { status: "CONFIRMED", label: "Order Confirmed", completed: order.status !== "PENDING" },
-      { status: "PREPARING", label: "Food Preparing", completed: ["CONFIRMED", "PREPARING", "OUT_FOR_DELIVERY", "DELIVERED"].includes(order.status) },
+      { status: "PREPARING", label: "Food Preparing", completed: ["CONFIRMED", "PREPARING", "READY_FOR_PICKUP", "OUT_FOR_DELIVERY", "DELIVERED"].includes(order.status) },
+      { status: "READY_FOR_PICKUP", label: "Ready for Pickup", completed: ["READY_FOR_PICKUP", "OUT_FOR_DELIVERY", "DELIVERED"].includes(order.status) },
       { status: "OUT_FOR_DELIVERY", label: "Out for Delivery", completed: ["OUT_FOR_DELIVERY", "DELIVERED"].includes(order.status) },
       { status: "DELIVERED", label: "Delivered", completed: order.status === "DELIVERED" }
     ]
@@ -137,7 +175,15 @@ export function OrderDetails({ order, onEdit, onStatusUpdate }: OrderDetailsProp
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="text-2xl">Order #{order.id}</CardTitle>
-              <p className="text-muted-foreground">Placed on {formatDate(order.orderDate)}</p>
+              {order.orderNumber && (
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-sm font-medium text-muted-foreground">Order Number:</span>
+                  <Badge variant="secondary" className="text-sm px-2 py-1 font-mono">
+                    {order.orderNumber}
+                  </Badge>
+                </div>
+              )}
+              <p className="text-muted-foreground">Placed on {formatDate(order.createdAt)}</p>
             </div>
             <div className="flex items-center gap-3">
               <Badge className={`${statusConfig[order.status].color} border text-sm px-3 py-1`}>
@@ -309,17 +355,25 @@ export function OrderDetails({ order, onEdit, onStatusUpdate }: OrderDetailsProp
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
               <div>
+                <label className="text-sm font-medium text-muted-foreground">Order Number</label>
+                <div className="flex items-center gap-2">
+                  <span className="text-lg font-mono font-semibold text-primary">
+                    {order.orderNumber || 'N/A'}
+                  </span>
+                </div>
+              </div>
+              <div>
                 <label className="text-sm font-medium text-muted-foreground">Order Date</label>
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <p className="text-lg">{formatDate(order.orderDate)}</p>
+                  <p className="text-lg">{formatDate(order.createdAt)}</p>
                 </div>
               </div>
               <div>
                 <label className="text-sm font-medium text-muted-foreground">Delivery Date</label>
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <p className="text-lg">{formatDate(order.deliveryDate)}</p>
+                  <p className="text-lg">{formatDateOnly(order.deliveryDate)}</p>
                 </div>
               </div>
               <div>
