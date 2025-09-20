@@ -13,16 +13,21 @@ export interface MenuItem {
   id: number;
   mainItem: string;
   mainItemQuantity: number;
+  mainItemCalories: number;
   secondaryItem: string;
   secondaryItemQuantity: number;
+  secondaryItemCalories: number;
   sideItem: string;
   sideItemQuantity: number;
+  sideItemCalories: number;
   price: number;
   imageUrl: string;
   description: string;
   weekday: string;
   weekDate: string;
   isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
   nutritionFacts?: NutritionFacts;
 }
 

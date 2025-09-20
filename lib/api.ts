@@ -1,4 +1,5 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
+import { MenuItem } from "./types";
 
 // Token cache to avoid multiple requests
 let tokenCache: { token: string | null; expiresAt: number } | null = null;
@@ -195,5 +196,22 @@ export async function apiFetch<T>(url: string, options?: RequestInit): Promise<T
       throw new Error(`Unsupported HTTP method: ${method}`);
   }
 }
+
+// Menu Items API
+export const menuItemsApi = {
+  getAll: async (): Promise<MenuItem[]> => {
+    const response = await fetch('https://3a19295b5657.ngrok-free.app/api/menu-items', {
+      headers: {
+        'ngrok-skip-browser-warning': 'true',
+      },
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    return response.json();
+  },
+};
 
 export default apiClient; 

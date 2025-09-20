@@ -20,12 +20,17 @@ import frame2 from "@/assets/Frame 2.png";
 import frame3 from "@/assets/Frame 3.png";
 import frame4 from "@/assets/Frame 4.png";
 import pickupImage from "@/assets/pick up image.png";
+import pickup from "@/assets/pickup.png";
+import subbann from "@/assets/subbann.png";
+import sabjis from "@/assets/food/sabjis.png";
 import indianCurryIndiaGif from "@/assets/Indian Curry India GIF.gif";
 import pbutterGif from "@/assets/pbutter.gif";
 import indianCurryFoodGif from "@/assets/Indian Curry Food GIF.gif";
 import tiffinlyBanner from "@/assets/TiffinlyBann.png";
 import veggisImage from "@/assets/veggis.png";
+import veggipImage from "@/assets/veggip.png";
 import { useState, useEffect } from "react";
+import { WeeklyMenuSection } from "@/components/menu-items/weekly-menu-section";
 
 export default function HomePage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -48,7 +53,7 @@ export default function HomePage() {
   }, [carouselImages.length]);
 
   return (
-    <div className="min-h-screen bg-white overflow-x-hidden">
+    <div className="min-h-screen bg-white overflow-x-hidden overscroll-none">
       {/* Header */}
       <motion.header
         initial={{ y: -20, opacity: 0 }}
@@ -349,7 +354,7 @@ export default function HomePage() {
       </section>
 
       {/* Why Choose Tiffinly Section */}
-      <section className="bg-white py-16 sm:py-20 md:py-24">
+      <section className="bg-green-800 py-16 sm:py-20 md:py-24">
         <div className="max-w-[1200px] mx-auto px-6 sm:px-6 w-full">
           <motion.div
             initial={{ y: 20, opacity: 0 }}
@@ -357,14 +362,14 @@ export default function HomePage() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <div className="text-sm font-medium text-gray-600 uppercase tracking-wide mb-4">
+            <div className="text-sm font-medium text-green-200 uppercase tracking-wide mb-4">
               Benefits
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
               Why Choose Tiffinly for Your Lunch Needs?
             </h2>
-            <p className="text-base sm:text-lg text-gray-600 max-w-3xl mx-auto">
-              Tiffinly brings you the best of Indian cuisine with unmatched convenience. Our service allows you to enjoy healthy, authentic meals without the hassle of cooking.
+            <p className="text-base sm:text-lg text-green-100 max-w-3xl mx-auto">
+            For students and professionals away from home, Tiffinly brings you the comfort of authentic Indian food—just like mom’s cooking—without the stress of grocery shopping or kitchen time.
             </p>
           </motion.div>
 
@@ -373,22 +378,21 @@ export default function HomePage() {
               {
                 title: "Convenience & Time Saving",
                 description:
-                  "No more meal prep or cooking. Your lunch is ready when you are, saving you precious time every day.",
-                image: pickupImage,
+                  "Pressed for time with classes or work? Skip cooking—your fresh lunch is ready for easy pickup on your way.",
+                image: pickup,
                 isCarousel: false,
               },
               {
-                title: "Daily Variety Menu",
+                title: "Affordable & Flexible Plans",
                 description:
-                  "Enjoy different authentic Indian dishes every day with our non-repeating weekly menu that keeps your meals exciting and diverse.",
-                image: null,
+                "Weekly and monthly subscriptions that fit student budgets and busy schedules.",
+                image: subbann,
                 isCarousel: false,
               },
               {
                 title: "Healthy HomeStyle Food",
-                description:
-                  "Made with traditional recipes and fresh ingredients by experienced chefs who understand authentic Indian cuisine.",
-                image: null,
+                description: "Fresh, healthy meals with the taste of home—just like mom's cooking.",
+                image: sabjis,
                 isCarousel: false,
               },
             ].map((feature, index) => (
@@ -401,8 +405,8 @@ export default function HomePage() {
               >
                 <Card className="bg-white border-0 shadow-sm overflow-hidden h-full">
                   <CardContent className="p-0">
-                    {/* Square Image Container */}
-                    <div className="aspect-square bg-gray-100 flex items-center justify-center relative overflow-hidden">
+                    {/* Image Container - perfect fit */}
+                    <div className="aspect-[3/2] bg-gray-100 relative overflow-hidden">
                       {feature.image ? (
                         <Image
                           src={feature.image}
@@ -412,17 +416,17 @@ export default function HomePage() {
                           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 300px"
                         />
                       ) : (
-                        <div className="w-16 h-16 bg-gray-300 rounded flex items-center justify-center">
+                        <div className="w-full h-full bg-gray-300 flex items-center justify-center">
                           <span className="text-gray-500 text-2xl">🍽️</span>
                         </div>
                       )}
                     </div>
                     {/* Text Content */}
-                    <div className="p-6 bg-green-900">
-                      <h3 className="text-xl font-bold text-white mb-4 text-center">
+                    <div className="p-6 bg-white">
+                      <h3 className="text-xl font-bold text-black mb-4 text-center">
                         {feature.title}
                       </h3>
-                      <p className="text-white text-base leading-relaxed text-center">
+                      <p className="text-black text-base leading-relaxed text-center">
                         {feature.description}
                       </p>
                     </div>
@@ -437,11 +441,21 @@ export default function HomePage() {
 
       {/* Subscription Options Section */}
       <section id="subscription-options" className="relative py-16 sm:py-20 md:py-32 overflow-hidden">
-        {/* Background Image */}
-        <div className="absolute inset-0 z-0">
+        {/* Background Image - Mobile */}
+        <div className="absolute inset-0 z-0 md:hidden">
+          <Image
+            src={veggipImage}
+            alt="Vegetables background mobile"
+            fill
+            className="object-cover"
+            sizes="100vw"
+          />
+        </div>
+        {/* Background Image - Desktop */}
+        <div className="absolute inset-0 z-0 hidden md:block">
           <Image
             src={veggisImage}
-            alt="Vegetables background"
+            alt="Vegetables background desktop"
             fill
             className="object-cover"
             sizes="100vw"
@@ -455,15 +469,17 @@ export default function HomePage() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Subscription Options
-            </h2>
-            <p className="text-base sm:text-lg text-gray-600">
-              Choose the plan that works best for your lifestyle
-            </p>
+            <div className="bg-green-900/100 md:bg-transparent rounded-lg p-6 md:p-0">
+              <h2 className="text-3xl md:text-4xl font-bold text-white md:text-gray-900 mb-4">
+                Subscription Options
+              </h2>
+              <p className="text-base sm:text-lg text-green-100 md:text-gray-600">
+                Choose the plan that works best for your lifestyle
+              </p>
+            </div>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 max-w-4xl mx-auto">
             {[
               {
                 title: "Weekly Plan",
@@ -471,11 +487,11 @@ export default function HomePage() {
                 price: "$55",
                 period: "per week",
                 features: [
-                  "5 delicious meals per week",
-                  "Flexible pickup times",
-                  "Cancel anytime",
-                  "Fresh daily preparation",
-                  "Daily variety menu",
+                  "5 delicious home style meals per week",
+                  "Pickup any time at any store*",
+                  "Upgrade to Monthly Plan",
+                  "Fresh meals Served Monday to Friday",
+                  " Weekly Flexible Plan",
                 ],
                 popular: false,
               },
@@ -485,11 +501,10 @@ export default function HomePage() {
                 price: "$180",
                 period: "per month",
                 features: [
-                  "20 authentic meals per month",
-                  "Priority pickup slots",
-                  "Menu customization options",
-                  "Best value guarantee",
-                  "Premium customer support",
+                  "20 delicious home style meals per month",
+                  "Pickup any time at any store*",
+                  "Fresh meals Served Monday to Friday",
+                  "Best value guarantee"
                 ],
                 popular: true,
                 savings: "Save $40/month",
@@ -546,7 +561,7 @@ export default function HomePage() {
                     
                     <div className="text-center">
                       <div className={`text-xs mb-2 ${plan.popular ? 'text-white' : 'text-gray-500'}`}>
-                        No hidden fees • Cancel anytime
+                        Subscribe In-App • Cancel anytime
                       </div>
                     </div>
                   </CardContent>
@@ -558,106 +573,80 @@ export default function HomePage() {
       </section>
 
       {/* Weekly Menu Section */}
-      <section className="bg-white py-16 sm:py-20 md:py-32">
+      <WeeklyMenuSection />
+
+      {/* Testimonials Section */}
+      <section className="py-16 sm:py-20 md:py-32" style={{ backgroundColor: '#4C00B3' }}>
         <div className="max-w-[1200px] mx-auto px-4 sm:px-6">
+          {/* Header Section */}
           <motion.div
             initial={{ y: 20, opacity: 0 }}
             whileInView={{ y: 0, opacity: 1 }}
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Weekly Menu
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+              Customer testimonials
             </h2>
-            <p className="text-base sm:text-lg text-gray-600">
-              Discover our delicious range of authentic Indian dishes
+            <p className="text-base sm:text-lg text-gray-200">
+              See what our happy customers have to say about their experience with our meal plans.
             </p>
           </motion.div>
 
-          <div className="relative">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5 sm:gap-6">
-              {[
-                { name: "Butter Chicken", price: "$15" },
-                { name: "Dal Makhani", price: "$12" },
-                { name: "Biryani Rice", price: "$18" },
-                { name: "Palak Paneer", price: "$14" },
-                { name: "Chicken Curry", price: "$16" },
-              ].map((product, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ y: 50, opacity: 0 }}
-                  whileInView={{ y: 0, opacity: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1 }}
-                >
-                  <Card className="overflow-hidden">
-                    <div className="w-full h-40 sm:h-48 bg-gray-200 flex items-center justify-center">
-                      <span className="text-4xl">🍽️</span>
-                    </div>
-                    <CardContent className="p-4">
-                      <h3 className="font-semibold text-gray-900 mb-2">
-                        {product.name}
-                      </h3>
-                      <p className="text-lg font-bold text-gray-900">
-                        {product.price}
-                      </p>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
-            </div>
+          {/* Testimonial Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+            {[
+              {
+                text: "Delicious food and excellent service! Highly recommend.",
+                name: "Het Shah",
+                position: "Software Engineer, Google."
+              },
+              {
+                text: "The meals are always ready on time and save me so much effort during my busy week. Super convenient!",
+                name: "Dr. Vatsal Parikh", 
+                position: "Physiotherapist (PT), Aelius."
+              },
+              {
+                text: "The affordable plan fits my budget perfectly and saves me hours every week. Highly recommend for busy students!",
+                name: "Shivani Jain",
+                position: "Student, NYU."
+              }
+            ].map((testimonial, index) => (
+              <motion.div
+                key={index}
+                initial={{ y: 50, opacity: 0 }}
+                whileInView={{ y: 0, opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+                className="bg-gray-50 border border-gray-200 rounded-lg p-6 h-full flex flex-col"
+              >
+                {/* Stars */}
+                <div className="flex mb-4">
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      className="w-5 h-5 text-gray-900 fill-current"
+                    />
+                  ))}
+                </div>
 
-            {/* Navigation Arrows */}
-            <div className="hidden lg:flex justify-between absolute top-1/2 -translate-y-1/2 w-full -mx-6">
-              <button className="w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50">
-                <ArrowRight className="w-6 h-6 text-gray-600 rotate-180" />
-              </button>
-              <button className="w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50">
-                <ArrowRight className="w-6 h-6 text-gray-600" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
+                {/* Testimonial Text */}
+                <blockquote className="text-gray-700 mb-6 flex-grow leading-relaxed">
+                  "{testimonial.text}"
+                </blockquote>
 
-      {/* Testimonial Section */}
-      <section className="py-16 sm:py-20 md:py-32" style={{ backgroundColor: '#4C00B3' }}>
-        <div className="max-w-[1200px] mx-auto px-4 sm:px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-12 items-center">
-            <motion.div
-              initial={{ x: -50, opacity: 0 }}
-              whileInView={{ x: 0, opacity: 1 }}
-              viewport={{ once: true }}
-              className="w-full h-64 sm:h-80 md:h-96 bg-gray-700 rounded-lg flex items-center justify-center"
-            >
-              <span className="text-6xl">👤</span>
-            </motion.div>
-
-            <motion.div
-              initial={{ x: 50, opacity: 0 }}
-              whileInView={{ x: 0, opacity: 1 }}
-              viewport={{ once: true }}
-              className="text-white"
-            >
-              <div className="flex mb-4">
-                {[...Array(5)].map((_, i) => (
-                  <Star
-                    key={i}
-                    className="w-6 h-6 text-yellow-400 fill-current"
-                  />
-                ))}
-              </div>
-              <blockquote className="text-lg sm:text-xl mb-6" style={{ fontFamily: 'Inter, system-ui, -apple-system, sans-serif' }}>
-                "Tiffinly has completely transformed my lunch routine. The food
-                is always fresh, authentic, and delicious. I can't imagine going
-                back to meal prep!"
-              </blockquote>
-              <div className="mb-6">
-                <p className="font-semibold text-lg text-white" style={{ fontFamily: 'Inter, system-ui, -apple-system, sans-serif' }}>Het Shah</p>
-                <p className="text-gray-300" style={{ fontFamily: 'Inter, system-ui, -apple-system, sans-serif' }}>Software Engineer</p>
-              </div>
-              
-            </motion.div>
+                {/* Author Info */}
+                <div className="flex items-center">
+                  <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                    <div className="w-6 h-6 bg-gray-500 rounded-sm"></div>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-900">{testimonial.name}</p>
+                    <p className="text-sm text-gray-600">{testimonial.position}</p>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
@@ -672,8 +661,8 @@ export default function HomePage() {
             className="space-y-6 sm:space-y-8 text-left"
           >
             <h2 className="text-4xl font-medium text-black leading-tight" style={{ fontFamily: 'Inter, system-ui, -apple-system, sans-serif' }}>
-              Get Your Fresh<br className="sm:hidden" />
-              <span className="hidden sm:inline"> </span>Lunch Today
+              Get your fresh<br className="sm:hidden" />
+              <span className="hidden sm:inline"> </span>meals today
             </h2>
             <p className="text-base sm:text-lg text-gray-600 max-w-2xl leading-relaxed" style={{ fontFamily: 'Inter, system-ui, -apple-system, sans-serif' }}>
               Download the Tiffinly app and choose your meal plan for effortless lunchtime convenience.
