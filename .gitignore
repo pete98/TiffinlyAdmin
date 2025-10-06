@@ -25,3 +25,14 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+# Local Netlify folder
+.netlify
+
+# Next.js build artifacts
+.next
+.next.prev
+.next*
+
+# Local environment and system files
+.env*.local
+.DS_Store

@@ -312,7 +312,7 @@ export default function HomePage() {
       </div>
 
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-orange-500 to-red-600 min-h-screen lg:min-h-[88vh] flex items-center py-12 sm:py-16 md:py-20 lg:py-16">
+      <section className="bg-gradient-to-r from-orange-500 to-red-600 min-h-screen lg:min-h-[90vh] flex items-center py-12 sm:py-16 md:py-20 lg:py-16">
         <div className="max-w-[1200px] mx-auto px-4 sm:px-6 w-full">
           <div className="grid gap-12 sm:gap-16 md:grid-cols-2 items-center">
             <div className="space-y-6 sm:space-y-8">
@@ -323,7 +323,7 @@ export default function HomePage() {
                 className="space-y-4"
               >
                 <div className="inline-block bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 border border-white/30">
-                  <span className="text-white text-sm font-medium">Launching October 13</span>
+                  <span className="text-white text-sm font-medium">Launching Soon</span>
                 </div>
                 <h1
                   className="text-5xl sm:text-5xl md:text-6xl font-black text-white leading-tight tracking-tight"
