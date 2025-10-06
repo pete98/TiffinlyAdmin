@@ -4,7 +4,8 @@ import { emailConfig, emailAddresses } from '@/lib/email-config';
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, honeypot } = await request.json();
+    const { email: rawEmail, honeypot } = await request.json();
+    const email = typeof rawEmail === 'string' ? rawEmail.trim() : '';
 
     if (typeof honeypot === 'string' && honeypot.trim() !== '') {
       console.warn('Waitlist honeypot triggered, ignoring submission');

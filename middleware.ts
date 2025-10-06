@@ -10,6 +10,7 @@ export async function middleware(request: NextRequest) {
   if (
     pathname.startsWith("/_next/") ||
     pathname.startsWith("/api/auth") ||
+    pathname.startsWith("/api/waitlist") ||
     pathname === "/favicon.ico" ||
     pathname === "/sitemap.xml" ||
     pathname === "/robots.txt" ||
@@ -65,7 +66,8 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico, sitemap.xml, robots.txt (metadata files)
      * - api/auth (Auth0 routes)
+     * - api/waitlist (public waitlist submissions)
      */
-    "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|api/auth).*)",
+    "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|api/auth|api/waitlist).*)",
   ],
 };

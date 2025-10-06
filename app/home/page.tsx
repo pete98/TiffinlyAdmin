@@ -65,7 +65,7 @@ export default function HomePage() {
     setEmail: (email: string) => void,
     resetHoneypot: () => void,
   ) => {
-    if (honeypotValue) {
+    if (honeypotValue.trim()) {
       // Silently drop honeypot submissions
       setEmail("");
       resetHoneypot();
@@ -73,12 +73,14 @@ export default function HomePage() {
       return;
     }
 
-    if (!email) {
+    const sanitizedEmail = email.trim();
+
+    if (!sanitizedEmail) {
       setError("Please enter your email address");
       return;
     }
 
-    if (!validateEmail(email)) {
+    if (!validateEmail(sanitizedEmail)) {
       setError("Please enter a valid email address");
       return;
     }
@@ -89,7 +91,7 @@ export default function HomePage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, honeypot: honeypotValue }),
+        body: JSON.stringify({ email: sanitizedEmail, honeypot: honeypotValue }),
       });
 
       if (response.ok) {
