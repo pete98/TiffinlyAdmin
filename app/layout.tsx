@@ -9,7 +9,7 @@ const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: "Tiffinly Foods",
-  description: "Admin dashboard for tiffin lunch delivery service",
+  description: "Tiffinly, A subscription based Indian Food Service. Pick Up Anywhere, Anytime!",
   generator: "v0.dev",
   appleWebApp: {
     capable: true,
