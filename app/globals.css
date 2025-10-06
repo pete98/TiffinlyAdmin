@@ -53,17 +53,29 @@
   * {
     @apply border-border;
   }
-  html, body {
-    @apply bg-background text-foreground;
-    height: 100%;
+  html {
+    @apply text-foreground;
+    /* Remove height constraint to allow natural document scrolling */
     overflow-x: hidden;
-    overscroll-behavior: none;
-    overscroll-behavior-y: none;
+    /* Allow natural scrolling for iOS Safari address bar behavior */
+    overscroll-behavior-y: auto;
+    overscroll-behavior-x: none;
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    @apply bg-background text-foreground;
+    /* Remove height constraint to allow natural document scrolling */
+    overflow-x: hidden;
+    /* Allow natural scrolling for iOS Safari address bar behavior */
+    overscroll-behavior-y: auto;
     overscroll-behavior-x: none;
   }
   body {
     position: relative;
     min-height: 100vh;
+    /* Ensure smooth scrolling for iOS Safari */
+    -webkit-overflow-scrolling: touch;
   }
 }
 
@@ -94,10 +106,127 @@
   overscroll-behavior-x: none;
 }
 
-/* Additional fixes for macOS trackpad scrolling */
+/* Additional fixes for iOS Safari scrolling and address bar behavior */
 @supports (-webkit-touch-callout: none) {
   html, body {
     -webkit-overflow-scrolling: touch;
-    overscroll-behavior: none;
+    /* Allow natural scrolling for address bar behavior */
+    overscroll-behavior-y: auto;
+    overscroll-behavior-x: none;
+    /* Remove height constraint to allow document scrolling */
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
   }
+  
+  /* Fix for iOS Safari viewport height issues */
+  body {
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+  }
+}
+
+/* iOS Safari address bar fixes */
+html {
+  /* Force white color for the refresh bar area */
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+  background-image: none !important;
+  margin: 0;
+  padding: 0;
+  /* Additional properties for iOS Safari refresh bar */
+  -webkit-tap-highlight-color: transparent;
+  /* Try setting the background on the document element */
+  background-attachment: fixed;
+}
+
+/* Set white background on document element */
+document {
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+}
+
+body {
+  /* Set white color for iOS Safari refresh bar */
+  background-color: #ffffff !important;
+  margin: 0;
+  padding: 0;
+}
+
+/* Force white background on document root */
+:root {
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+}
+
+/* Force white backgrounds in all modes */
+@media (prefers-color-scheme: dark) {
+  html {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    background-image: none !important;
+  }
+  
+  body {
+    background-color: #ffffff !important;
+  }
+  
+  :root {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+  }
+}
+
+/* Additional iOS Safari refresh bar styling */
+@supports (-webkit-touch-callout: none) {
+  html {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    background-image: none !important;
+    /* Additional iOS Safari properties */
+    -webkit-background-size: cover;
+    background-size: cover;
+  }
+  
+  :root {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+  }
+  
+  document {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+  }
+}
+
+/* Ensure proper scrolling behavior for iOS Safari address bar */
+html {
+  /* Allow the document to scroll naturally */
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+body {
+  /* Ensure body can scroll and trigger address bar behavior */
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Ensure header area is always white during loading */
+header {
+  background-color: #ffffff !important;
+}
+
+/* Ensure navbar area is white during loading */
+body > main > div > header {
+  background-color: #ffffff !important;
+}
+
+/* Force only navbar to always be white regardless of theme */
+header {
+  background-color: #ffffff !important;
+}
+
+/* Override any dark mode classes for navbar only */
+.dark header {
+  background-color: #ffffff !important;
 }

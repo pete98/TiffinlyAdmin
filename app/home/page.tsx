@@ -19,10 +19,11 @@ import frame1 from "@/assets/Frame 1.png";
 import frame2 from "@/assets/Frame 2.png";
 import frame3 from "@/assets/Frame 3.png";
 import frame4 from "@/assets/Frame 4.png";
+import frame5 from "@/assets/phoneframe.png"
 import pickupImage from "@/assets/pick up image.png";
 import pickup from "@/assets/pickup.png";
 import subbann from "@/assets/subbann.png";
-import sabjis from "@/assets/food/sabjis.png";
+import sub from "@/assets/food/sub.png";
 import indianCurryIndiaGif from "@/assets/Indian Curry India GIF.gif";
 import pbutterGif from "@/assets/pbutter.gif";
 import indianCurryFoodGif from "@/assets/Indian Curry Food GIF.gif";
@@ -35,6 +36,58 @@ import { WeeklyMenuSection } from "@/components/menu-items/weekly-menu-section";
 export default function HomePage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [heroEmail, setHeroEmail] = useState("");
+  const [heroEmailError, setHeroEmailError] = useState("");
+  const [ctaEmail, setCtaEmail] = useState("");
+  const [ctaEmailError, setCtaEmailError] = useState("");
+  
+  // Email validation function
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const handleEmailChange = (email: string, setEmail: (email: string) => void, setError: (error: string) => void) => {
+    setEmail(email);
+    if (email && !validateEmail(email)) {
+      setError("Please enter a valid email address");
+    } else {
+      setError("");
+    }
+  };
+
+  const handleEmailSubmit = async (email: string, setError: (error: string) => void, setEmail: (email: string) => void) => {
+    if (!email) {
+      setError("Please enter your email address");
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      setError("Please enter a valid email address");
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/waitlist', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      if (response.ok) {
+        alert('Thank you for joining our waitlist! We\'ll be in touch soon.');
+        setEmail('');
+        setError('');
+      } else {
+        const error = await response.json();
+        alert(error.error || 'Something went wrong. Please try again.');
+      }
+    } catch (error) {
+      alert('Something went wrong. Please try again.');
+    }
+  };
   
   const carouselImages = [
     indianCurryIndiaGif,
@@ -52,150 +105,196 @@ export default function HomePage() {
     return () => clearInterval(interval);
   }, [carouselImages.length]);
 
+  // Handle viewport changes for mobile browsers
+  useEffect(() => {
+    const isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
+    const handleResize = () => {
+      // Force a reflow to prevent viewport issues
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty("--vh", `${vh}px`);
+
+      if (isiOS) {
+        document.documentElement.style.setProperty("--ios-vh", `${window.innerHeight}px`);
+      }
+    };
+
+    // Handle input focus/blur to prevent viewport issues and scroll to input
+    const handleFocusIn = (e: FocusEvent) => {
+      if (e.target && (e.target as HTMLElement).tagName === 'INPUT') {
+        const input = e.target as HTMLInputElement;
+        // Check if it's an email input
+        if (input.type === 'email') {
+          setTimeout(() => {
+            // Scroll the input into view with some offset from top
+            input.scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'center',
+              inline: 'nearest'
+            });
+          }, 100);
+        } else {
+          setTimeout(() => {
+            window.scrollTo(0, 0);
+          }, 100);
+        }
+      }
+    };
+
+    const handleFocusOut = (e: FocusEvent) => {
+      if (e.target && (e.target as HTMLElement).tagName === 'INPUT') {
+        setTimeout(() => {
+          handleResize();
+        }, 300);
+      }
+    };
+
+    // Initial setup
+    handleResize();
+
+    window.addEventListener("resize", handleResize);
+    window.addEventListener("orientationchange", handleResize);
+    document.addEventListener("focusin", handleFocusIn);
+    document.addEventListener("focusout", handleFocusOut);
+
+    if (isiOS) {
+      window.addEventListener("scroll", handleResize, { passive: true });
+    }
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("orientationchange", handleResize);
+      document.removeEventListener("focusin", handleFocusIn);
+      document.removeEventListener("focusout", handleFocusOut);
+      if (isiOS) {
+        window.removeEventListener("scroll", handleResize);
+      }
+    };
+  }, []);
+
   return (
-    <div className="min-h-screen bg-white overflow-x-hidden overscroll-none">
-      {/* Header */}
-      <motion.header
-        initial={{ y: -20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        className="bg-white border-b border-gray-100 px-4 py-2 sm:px-6 sm:py-3 sticky top-0 z-50"
+    <main
+      className="w-full"
+    >
+      <div
+        className="flex flex-col"
+        style={{
+          paddingBottom: "env(safe-area-inset-bottom, 0px)",
+          WebkitOverflowScrolling: "touch",
+        }}
       >
-        <div className="max-w-[1200px] mx-auto flex items-center justify-between gap-3">
-          {/* Logo */}
-          <div className="flex items-center justify-center">
-            <Image 
-              src={tiffinlyBanner} 
-              alt="Tiffinly Banner" 
-              width={166} 
-              height={55}
-              className="rounded-sm"
-            />
-          </div>
+        {/* Header */}
+        <motion.header
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className="bg-white border-b border-gray-100 px-3 sm:px-4 pb-1 sm:pb-2"
+          style={{
+            paddingTop: 'max(env(safe-area-inset-top, 0px), 14px)',
+            backgroundColor: '#ffffff'
+          }}
+        >
+          <div className="max-w-[1200px] mx-auto flex items-center justify-between gap-2">
+            {/* Logo */}
+            <div className="flex items-center justify-center">
+              <Image 
+                src={tiffinlyBanner} 
+                alt="Tiffinly Banner" 
+                width={116} 
+                height={38}
+                className="rounded-sm"
+              />
+            </div>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center space-x-8">
-            <a
-              href="#"
-              className="text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              Home
-            </a>
-            <a
-              href="#"
-              className="text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              Menu
-            </a>
-            <a
-              href="#"
-              className="text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              How it works
-            </a>
-            <a
-              href="#"
-              className="text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              About Us
-            </a>
-            <a
-              href="#"
-              className="text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              Contact Us
-            </a>
-            <Button className="bg-brand hover:bg-brand/90 text-white">
-              Download
-            </Button>
-            <a
-              href="#"
-              className="text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              Login
-            </a>
-            <a
-              href="#"
-              className="text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              Signup
-            </a>
-          </nav>
-
-          {/* Mobile Menu Button */}
-          <div className="lg:hidden flex items-center space-x-3">
-            <Button className="bg-brand hover:bg-brand/90 text-white">
-              Download
-            </Button>
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="p-2"
-            >
-              {isMobileMenuOpen ? (
-                <X className="h-6 w-6" />
-              ) : (
-                <Menu className="h-6 w-6" />
-              )}
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile Navigation Menu */}
-        {isMobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="lg:hidden bg-white border-t border-gray-100 px-4 py-4 sm:px-6"
-          >
-            <nav className="flex flex-col space-y-4">
+            {/* Desktop Navigation */}
+            <nav className="hidden lg:flex items-center space-x-6">
               <a
                 href="#"
                 className="text-gray-600 hover:text-gray-900 transition-colors"
               >
                 Home
               </a>
-              <a
-                href="#"
-                className="text-gray-600 hover:text-gray-900 transition-colors"
-              >
-                Menu
-              </a>
-              <a
-                href="#"
-                className="text-gray-600 hover:text-gray-900 transition-colors"
+               <a
+                href="#simple-steps"
+                className="text-gray-600 hover:text-gray-900 transition-colors relative after:absolute after:left-0 after:-bottom-1 after:h-0.5 after:bg-gray-900 after:w-0 hover:after:w-full after:transition-all after:duration-300"
               >
                 How it works
               </a>
               <a
-                href="#"
-                className="text-gray-600 hover:text-gray-900 transition-colors"
+                href="#subscription-options"
+                className="text-gray-600 hover:text-gray-900 transition-colors relative after:absolute after:left-0 after:-bottom-1 after:h-0.5 after:bg-gray-900 after:w-0 hover:after:w-full after:transition-all after:duration-300"
               >
-                About Us
+                Pricing
               </a>
               <a
-                href="#"
-                className="text-gray-600 hover:text-gray-900 transition-colors"
+                href="#weekly-menu"
+                className="text-gray-600 hover:text-gray-900 transition-colors relative after:absolute after:left-0 after:-bottom-1 after:h-0.5 after:bg-gray-900 after:w-0 hover:after:w-full after:transition-all after:duration-300"
               >
-                Contact Us
+                Menu
               </a>
-              <a
-                href="#"
-                className="text-gray-600 hover:text-gray-900 transition-colors"
-              >
-                Login
-              </a>
-              <a
-                href="#"
-                className="text-gray-600 hover:text-gray-900 transition-colors"
-              >
-                Signup
-              </a>
+              
+             
+              {/* <Button className="bg-brand hover:bg-brand/90 text-white">
+                Download
+              </Button> */}
             </nav>
-          </motion.div>
-        )}
-      </motion.header>
 
-      {/* Repeating Stripe Pattern */}
-      <div className="bg-black py-3 overflow-hidden">
+            {/* Mobile Menu Button */}
+            <div className="lg:hidden flex items-center space-x-2">
+              {/* <Button className="bg-brand hover:bg-brand/90 text-white">
+                Download
+              </Button> */}
+              <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="p-1.5"
+              >
+                {isMobileMenuOpen ? (
+                  <X className="h-5 w-5" />
+                ) : (
+                  <Menu className="h-5 w-5" />
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Mobile Navigation Menu */}
+          {isMobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="lg:hidden bg-white border-t border-gray-100 px-3 py-3 sm:px-4"
+              style={{ backgroundColor: '#ffffff' }}
+            >
+              <nav className="flex flex-col space-y-3">
+                <a
+                  href="#"
+                  className="text-gray-600 hover:text-gray-900 transition-colors"
+                >
+                  Home
+                </a>
+                <a
+                  href="#weekly-menu"
+                  className="text-gray-600 hover:text-gray-900 transition-colors"
+                >
+                  Menu
+                </a>
+                <a
+                  href="#subscription-options"
+                  className="text-gray-600 hover:text-gray-900 transition-colors"
+                >
+                  Pricing
+                </a>
+                <a
+                  href="#simple-steps"
+                  className="text-gray-600 hover:text-gray-900 transition-colors"
+                >
+                  How it works
+                </a>
+              </nav>
+            </motion.div>
+          )}
+        </motion.header>
+        {/* Repeating Stripe Pattern */}
+        <div className="bg-black py-3 overflow-hidden">
         <div className="flex animate-scroll">
           {Array.from({ length: 10 }).map((_, index) => (
             <div key={index} className="flex items-center whitespace-nowrap text-white text-sm font-bold uppercase tracking-wide">
@@ -213,19 +312,26 @@ export default function HomePage() {
       </div>
 
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-orange-500 to-red-600 min-h-[calc(100vh-80px)] flex items-center py-12 sm:py-16 md:py-20">
+      <section className="bg-gradient-to-r from-orange-500 to-red-600 min-h-screen lg:min-h-[88vh] flex items-center py-12 sm:py-16 md:py-20 lg:py-16">
         <div className="max-w-[1200px] mx-auto px-4 sm:px-6 w-full">
           <div className="grid gap-12 sm:gap-16 md:grid-cols-2 items-center">
             <div className="space-y-6 sm:space-y-8">
-              <motion.h1
+              <motion.div
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ duration: 0.6 }}
-                className="text-5xl sm:text-5xl md:text-6xl font-black text-white leading-tight tracking-tight"
-                style={{ fontFamily: 'Inter, system-ui, -apple-system, sans-serif' }}
+                className="space-y-4"
               >
-                Fresh Indian lunches, ready when you are
-              </motion.h1>
+                <div className="inline-block bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 border border-white/30">
+                  <span className="text-white text-sm font-medium">Launching October 13</span>
+                </div>
+                <h1
+                  className="text-5xl sm:text-5xl md:text-6xl font-black text-white leading-tight tracking-tight"
+                  style={{ fontFamily: 'Inter, system-ui, -apple-system, sans-serif' }}
+                >
+                  Fresh Indian lunches, ready when you are
+                </h1>
+              </motion.div>
 
               <motion.p
                 initial={{ y: 20, opacity: 0 }}
@@ -244,7 +350,8 @@ export default function HomePage() {
                 transition={{ duration: 0.6, delay: 0.3 }}
                 className="flex flex-col gap-4"
               >
-                <div className="flex flex-row flex-wrap items-center gap-3 sm:gap-4">
+                {/* Download and Pricing buttons commented out */}
+                {/* <div className="flex flex-row flex-wrap items-center gap-3 sm:gap-4">
                   <Button className="bg-black text-white shadow-md px-7 py-3 text-base sm:px-10 sm:text-lg hover:opacity-90 rounded-full">
                     Download
                   </Button>
@@ -258,6 +365,32 @@ export default function HomePage() {
                   >
                     Pricing
                   </Button>
+                </div> */}
+                
+                {/* Waitlist Email Signup */}
+                <div className="space-y-4">
+                  <div className="flex flex-col gap-3 max-w-md">
+                    <div className="flex flex-row gap-3">
+                      <input
+                        type="email"
+                        placeholder="Enter your email address"
+                        value={heroEmail}
+                        onChange={(e) => handleEmailChange(e.target.value, setHeroEmail, setHeroEmailError)}
+                        className={`flex-1 px-4 py-3 rounded-full border-0 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 h-12 ${
+                          heroEmailError ? 'focus:ring-red-500/50' : 'focus:ring-white/50'
+                        }`}
+                      />
+                      <Button 
+                        className="bg-black text-white hover:bg-gray-800 px-6 py-3 rounded-full font-medium h-12 whitespace-nowrap"
+                        onClick={() => handleEmailSubmit(heroEmail, setHeroEmailError, setHeroEmail)}
+                      >
+                        Join Waitlist
+                      </Button>
+                    </div>
+                    {heroEmailError && (
+                      <p className="text-black text-sm ml-1">{heroEmailError}</p>
+                    )}
+                  </div>
                 </div>
                 
                 <motion.p
@@ -278,7 +411,7 @@ export default function HomePage() {
               className="flex justify-center md:justify-end"
             >
               <Image
-                src={heroImage}
+                src={frame5}
                 alt="Tiffinly app preview"
                 priority
                 width={720}
@@ -378,21 +511,21 @@ export default function HomePage() {
               {
                 title: "Convenience & Time Saving",
                 description:
-                  "Pressed for time with classes or work? Skip cooking—your fresh lunch is ready for easy pickup on your way.",
+                  "Pressed for time with classes or work? Skip cooking, your fresh lunch is ready for easy pickup on your way.",
                 image: pickup,
                 isCarousel: false,
               },
               {
                 title: "Affordable & Flexible Plans",
                 description:
-                "Weekly and monthly subscriptions that fit student budgets and busy schedules.",
+                "Weekly and monthly subscriptions that fit your budget and busy schedules.",
                 image: subbann,
                 isCarousel: false,
               },
               {
                 title: "Healthy HomeStyle Food",
-                description: "Fresh, healthy meals with the taste of home—just like mom's cooking.",
-                image: sabjis,
+                description: "Fresh healthy meals with the taste of home, just like mom's cooking.",
+                image: sub,
                 isCarousel: false,
               },
             ].map((feature, index) => (
@@ -665,9 +798,10 @@ export default function HomePage() {
               <span className="hidden sm:inline"> </span>meals today
             </h2>
             <p className="text-base sm:text-lg text-gray-600 max-w-2xl leading-relaxed" style={{ fontFamily: 'Inter, system-ui, -apple-system, sans-serif' }}>
-              Download the Tiffinly app and choose your meal plan for effortless lunchtime convenience.
+              Join our waitlist to be the first to know when Tiffinly launches in your area.
             </p>
-            <div className="flex flex-row gap-3 sm:gap-4 justify-start">
+            {/* Download and Pricing buttons commented out */}
+            {/* <div className="flex flex-row gap-3 sm:gap-4 justify-start">
               <Button className="bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white px-6 py-3 text-base sm:px-8 sm:text-lg rounded-full border-0 w-[35%] sm:w-auto">
                 Download
               </Button>
@@ -677,13 +811,42 @@ export default function HomePage() {
               >
                 Pricing
               </Button>
+            </div> */}
+            
+            {/* Waitlist Email Signup */}
+            <div className="space-y-4">
+              <h3 className="text-xl font-semibold text-black">Enter Email to Join Waitlist</h3>
+              <div className="flex flex-col gap-3 max-w-md">
+                <div className="flex flex-row gap-3">
+                  <input
+                    type="email"
+                    placeholder="Enter your email address"
+                    value={ctaEmail}
+                    onChange={(e) => handleEmailChange(e.target.value, setCtaEmail, setCtaEmailError)}
+                    className={`flex-1 px-4 py-3 rounded-full border text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 h-12 ${
+                      ctaEmailError 
+                        ? 'border-red-500 focus:ring-red-500/50' 
+                        : 'border-gray-300 focus:ring-orange-500/50'
+                    }`}
+                  />
+                  <Button 
+                    className="bg-black text-white hover:bg-gray-800 px-6 py-3 rounded-full font-medium h-12 whitespace-nowrap"
+                    onClick={() => handleEmailSubmit(ctaEmail, setCtaEmailError, setCtaEmail)}
+                  >
+                    Join Waitlist
+                  </Button>
+                </div>
+                {ctaEmailError && (
+                  <p className="text-black text-sm ml-1">{ctaEmailError}</p>
+                )}
+              </div>
             </div>
           </motion.div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-black py-12 sm:py-16">
+      <footer className="bg-black py-12 sm:py-16 pb-20">
         <div className="max-w-[1200px] mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 sm:gap-10">
             {/* Logo */}
@@ -804,7 +967,7 @@ export default function HomePage() {
           </div>
         </div>
       </footer>
-    </div>
+      </div>
+    </main>
   );
 }
-

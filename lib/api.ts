@@ -1,4 +1,5 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
+import { API_BASE_URL, API_ENDPOINTS } from "./constants";
 import { MenuItem } from "./types";
 
 // Token cache to avoid multiple requests
@@ -63,7 +64,7 @@ async function getAccessToken(): Promise<string | null> {
 // Create axios instance with default config
 const createApiInstance = (): AxiosInstance => {
   const instance = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_API_URL || '',
+    baseURL: API_BASE_URL,
     headers: {
       'Content-Type': 'application/json',
       'ngrok-skip-browser-warning': 'true',
@@ -200,7 +201,7 @@ export async function apiFetch<T>(url: string, options?: RequestInit): Promise<T
 // Menu Items API
 export const menuItemsApi = {
   getAll: async (): Promise<MenuItem[]> => {
-    const response = await fetch('https://3a19295b5657.ngrok-free.app/api/menu-items', {
+    const response = await fetch(API_ENDPOINTS.MENU_ITEMS, {
       headers: {
         'ngrok-skip-browser-warning': 'true',
       },

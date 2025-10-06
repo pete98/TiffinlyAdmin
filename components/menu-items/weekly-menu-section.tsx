@@ -32,7 +32,7 @@ export function WeeklyMenuSection() {
 
   if (loading) {
     return (
-      <section className="bg-white py-16 sm:py-20 md:py-32">
+      <section id="weekly-menu" className="bg-white py-16 sm:py-20 md:py-32">
         <div className="max-w-[1200px] mx-auto px-4 sm:px-6">
           <motion.div
             initial={{ y: 20, opacity: 0 }}
@@ -84,7 +84,7 @@ export function WeeklyMenuSection() {
 
   if (error) {
     return (
-      <section className="bg-white py-16 sm:py-20 md:py-32">
+      <section id="weekly-menu" className="bg-white py-16 sm:py-20 md:py-32">
         <div className="max-w-[1200px] mx-auto px-4 sm:px-6">
           <motion.div
             initial={{ y: 20, opacity: 0 }}
@@ -105,7 +105,7 @@ export function WeeklyMenuSection() {
   }
 
   return (
-    <section className="bg-white py-16 sm:py-20 md:py-32">
+    <section id="weekly-menu" className="bg-white py-16 sm:py-20 md:py-32">
       <div className="max-w-[1200px] mx-auto px-4 sm:px-6">
         <motion.div
           initial={{ y: 20, opacity: 0 }}

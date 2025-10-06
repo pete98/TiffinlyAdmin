@@ -5,7 +5,7 @@ export function generateReferralLink(promotion: Promotion): string {
     throw new Error("Promotion must be of type referral");
   }
   
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://tiffin-app.com";
   const code = promotion.code || promotion.id;
   
   return `${baseUrl}/r/${code}`;
