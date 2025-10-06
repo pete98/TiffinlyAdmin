@@ -8,7 +8,7 @@ import { Toaster } from "@/components/ui/toaster"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Tiffin Admin Dashboard",
+  title: "Tiffinly Foods",
   description: "Admin dashboard for tiffin lunch delivery service",
   generator: "v0.dev",
   appleWebApp: {
