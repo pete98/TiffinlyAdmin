@@ -4,7 +4,15 @@ import { emailConfig, emailAddresses } from '@/lib/email-config';
 
 export async function POST(request: NextRequest) {
   try {
-    const { email } = await request.json();
+    const { email, honeypot } = await request.json();
+
+    if (typeof honeypot === 'string' && honeypot.trim() !== '') {
+      console.warn('Waitlist honeypot triggered, ignoring submission');
+      return NextResponse.json(
+        { message: 'Successfully added to waitlist!' },
+        { status: 200 }
+      );
+    }
 
     if (!email) {
       return NextResponse.json(

@@ -38,8 +38,10 @@ export default function HomePage() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [heroEmail, setHeroEmail] = useState("");
   const [heroEmailError, setHeroEmailError] = useState("");
+  const [heroHoneypot, setHeroHoneypot] = useState("");
   const [ctaEmail, setCtaEmail] = useState("");
   const [ctaEmailError, setCtaEmailError] = useState("");
+  const [ctaHoneypot, setCtaHoneypot] = useState("");
   
   // Email validation function
   const validateEmail = (email: string): boolean => {
@@ -56,7 +58,21 @@ export default function HomePage() {
     }
   };
 
-  const handleEmailSubmit = async (email: string, setError: (error: string) => void, setEmail: (email: string) => void) => {
+  const handleEmailSubmit = async (
+    email: string,
+    honeypotValue: string,
+    setError: (error: string) => void,
+    setEmail: (email: string) => void,
+    resetHoneypot: () => void,
+  ) => {
+    if (honeypotValue) {
+      // Silently drop honeypot submissions
+      setEmail("");
+      resetHoneypot();
+      setError("");
+      return;
+    }
+
     if (!email) {
       setError("Please enter your email address");
       return;
@@ -73,13 +89,14 @@ export default function HomePage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, honeypot: honeypotValue }),
       });
 
       if (response.ok) {
         alert('Thank you for joining our waitlist! We\'ll be in touch soon.');
         setEmail('');
         setError('');
+        resetHoneypot();
       } else {
         const error = await response.json();
         alert(error.error || 'Something went wrong. Please try again.');
@@ -380,9 +397,28 @@ export default function HomePage() {
                           heroEmailError ? 'focus:ring-red-500/50' : 'focus:ring-white/50'
                         }`}
                       />
+                      {/* Honeypot field – hidden from real users */}
+                      <div className="sr-only" aria-hidden="true">
+                        <label htmlFor="hero-company" className="block text-sm">Company</label>
+                        <input
+                          id="hero-company"
+                          type="text"
+                          tabIndex={-1}
+                          autoComplete="off"
+                          value={heroHoneypot}
+                          onChange={(event) => setHeroHoneypot(event.target.value)}
+                          className="mt-1 w-full rounded border border-gray-200 bg-white text-gray-900"
+                        />
+                      </div>
                       <Button 
                         className="bg-black text-white hover:bg-gray-800 px-6 py-3 rounded-full font-medium h-12 whitespace-nowrap"
-                        onClick={() => handleEmailSubmit(heroEmail, setHeroEmailError, setHeroEmail)}
+                        onClick={() => handleEmailSubmit(
+                          heroEmail,
+                          heroHoneypot,
+                          setHeroEmailError,
+                          setHeroEmail,
+                          () => setHeroHoneypot("")
+                        )}
                       >
                         Join Waitlist
                       </Button>
@@ -829,9 +865,28 @@ export default function HomePage() {
                         : 'border-gray-300 focus:ring-orange-500/50'
                     }`}
                   />
+                  {/* Honeypot field – hidden from real users */}
+                  <div className="sr-only" aria-hidden="true">
+                    <label htmlFor="cta-company" className="block text-sm">Company</label>
+                    <input
+                      id="cta-company"
+                      type="text"
+                      tabIndex={-1}
+                      autoComplete="off"
+                      value={ctaHoneypot}
+                      onChange={(event) => setCtaHoneypot(event.target.value)}
+                      className="mt-1 w-full rounded border border-gray-200 bg-white text-gray-900"
+                    />
+                  </div>
                   <Button 
                     className="bg-black text-white hover:bg-gray-800 px-6 py-3 rounded-full font-medium h-12 whitespace-nowrap"
-                    onClick={() => handleEmailSubmit(ctaEmail, setCtaEmailError, setCtaEmail)}
+                    onClick={() => handleEmailSubmit(
+                      ctaEmail,
+                      ctaHoneypot,
+                      setCtaEmailError,
+                      setCtaEmail,
+                      () => setCtaHoneypot("")
+                    )}
                   >
                     Join Waitlist
                   </Button>
