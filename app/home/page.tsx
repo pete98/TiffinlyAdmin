@@ -155,10 +155,10 @@ export default function HomePage() {
         className="text-center mb-10"
       >
         <div className="bg-green-900/100 md:bg-transparent rounded-3xl md:rounded-none p-6 md:p-0">
-          <h2 className="text-3xl md:text-4xl font-bold text-white md:text-gray-900 mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-white md:text-white mb-4">
             Subscription Options
           </h2>
-          <p className="text-base sm:text-lg text-green-100 md:text-gray-600">
+          <p className="text-base sm:text-lg text-green-100 md:text-green-100">
             Choose the plan that works best for your lifestyle
           </p>
         </div>
@@ -763,7 +763,7 @@ export default function HomePage() {
             {renderSubscriptionContent()}
           </div>
           <div className="hidden md:flex items-center justify-center">
-            <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12 max-w-[1000px] w-full">
+            <div className="bg-green-900 text-white rounded-3xl shadow-2xl p-8 md:p-12 max-w-[1000px] w-full">
               {renderSubscriptionContent()}
             </div>
           </div>
