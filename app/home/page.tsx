@@ -114,6 +114,136 @@ export default function HomePage() {
     indianCurryFoodGif,
   ];
 
+  const pickupPlans = [
+    {
+      title: "Weekly Plan",
+      subtitle: "Try our meals for a week",
+      price: "$55",
+      period: "per week",
+      features: [
+        "5 delicious home style meals per week",
+        "Just $11 per meal",
+        "Pickup any time from any store*",
+        "Add doorstep delivery for $4 per meal",
+        "Upgrade to the monthly plan anytime",
+      ],
+      popular: false as const,
+    },
+    {
+      title: "Monthly Plan",
+      subtitle: "Best value for busy students and professionals",
+      price: "$199",
+      period: "per month",
+      features: [
+        "20 delicious home style meals per month",
+        "Just $10 per meal",
+        "Free scheduled home delivery",
+        "Pickup any time at any store*",
+        "Best value save up to $80/month",
+      ],
+      popular: true as const,
+     
+    },
+  ];
+
+  const renderSubscriptionContent = () => (
+    <>
+      <motion.div
+        initial={{ y: 20, opacity: 0 }}
+        whileInView={{ y: 0, opacity: 1 }}
+        viewport={{ once: true }}
+        className="text-center mb-10"
+      >
+        <div className="bg-green-900/100 md:bg-transparent rounded-3xl md:rounded-none p-6 md:p-0">
+          <h2 className="text-3xl md:text-4xl font-bold text-white md:text-gray-900 mb-4">
+            Subscription Options
+          </h2>
+          <p className="text-base sm:text-lg text-green-100 md:text-gray-600">
+            Choose the plan that works best for your lifestyle
+          </p>
+        </div>
+      </motion.div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-12 max-w-4xl mx-auto">
+        {pickupPlans.map((plan, index) => (
+          <motion.div
+            key={index}
+            initial={{ y: 50, opacity: 0 }}
+            whileInView={{ y: 0, opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: index * 0.2 }}
+            className="relative"
+          >
+            <Card
+              className={`p-5 sm:p-8 h-full shadow-2xl hover:shadow-3xl transition-shadow duration-300 border-0 ${
+                plan.popular ? "bg-white text-gray-900" : "bg-white"
+              }`}
+            >
+              <CardContent className="p-0">
+                {plan.popular && (
+                  <div className="absolute -top-3 right-4 sm:right-6">
+                    <Badge className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-4 py-1 font-semibold shadow-lg">
+                      Most Popular
+                    </Badge>
+                  </div>
+                )}
+                
+                <div className="text-center mb-5 md:mb-6">
+                  <h3 className={`text-2xl md:text-3xl font-bold mb-2 ${plan.popular ? 'text-gray-900' : 'text-gray-900'}`}>
+                    {plan.title}
+                  </h3>
+                  <p className={`text-sm md:text-base mb-3 md:mb-4 ${plan.popular ? 'text-gray-700' : 'text-gray-600]'}`}>
+                    {plan.subtitle}
+                  </p>
+                  <div className="flex items-baseline justify-center mb-2">
+                    <span className={`text-5xl md:text-6xl font-bold ${plan.popular ? 'text-gray-900' : 'text-gray-900'}`}>{plan.price}</span>
+                    <span className={`ml-2 text-base md:text-lg ${plan.popular ? 'text-gray-700' : 'text-gray-600'}`}>/{plan.period}</span>
+                  </div>
+      
+                </div>
+                
+                <ul className="space-y-3 md:space-y-4 mb-5 md:mb-6">
+                  {plan.features.map((feature, featureIndex) => (
+                    <li key={featureIndex} className="flex items-start">
+                      <Check
+                        className={`w-5 h-5 mr-3 flex-shrink-0 mt-0.5 ${
+                          plan.popular && (
+                            feature === "Free scheduled home delivery" ||
+                            feature === "Best value save up to $80/month"
+                          )
+                            ? "text-orange-500"
+                            : "text-gray-900"
+                        }`}
+                      />
+                      <span
+                        className={`text-sm md:text-base leading-relaxed ${
+                          plan.popular && feature === "Free scheduled home delivery"
+                            ? "bg-gradient-to-r from-orange-500 to-red-600 text-white px-2 py-1 rounded-md"
+                            : plan.popular && feature === "Best value save up to $80/month"
+                            ? "bg-gradient-to-r from-orange-500 to-red-600 text-white px-2 py-1 rounded-md"
+                            : plan.popular
+                            ? "text-gray-700"
+                            : "text-gray-700"
+                        }`}
+                      >
+                        {feature}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+                
+                <div className="text-center">
+                  <div className={`text-sm md:text-base mb-2 ${plan.popular ? 'text-gray-600' : 'text-gray-500'}`}>
+                    Subscribe In-App • Cancel anytime
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ))}
+      </div>
+    </>
+  );
+
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentImageIndex((prevIndex) => 
@@ -334,7 +464,7 @@ export default function HomePage() {
       <section className="bg-gradient-to-r from-orange-500 to-red-600 min-h-screen lg:min-h-[90vh] flex items-center py-12 sm:py-16 md:py-20 lg:py-16">
         <div className="max-w-[1200px] mx-auto px-4 sm:px-6 w-full">
           <div className="grid gap-12 sm:gap-16 md:grid-cols-2 items-center">
-            <div className="space-y-6 sm:space-y-8">
+            <div className="space-y-6 sm:space-y-8 w-full max-w-lg mx-auto text-left md:mx-0 md:max-w-xl justify-self-stretch md:justify-self-start">
               <motion.div
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
@@ -348,7 +478,7 @@ export default function HomePage() {
                   className="text-5xl sm:text-5xl md:text-6xl font-black text-white leading-tight tracking-tight"
                   style={{ fontFamily: 'Inter, system-ui, -apple-system, sans-serif' }}
                 >
-                  Fresh Indian lunches, ready when you are
+                  Fresh Indian Meals, ready when you are.
                 </h1>
               </motion.div>
 
@@ -358,10 +488,7 @@ export default function HomePage() {
                 transition={{ duration: 0.6, delay: 0.15 }}
                 className="text-lg sm:text-lg text-white max-w-xl"
               >
-                Experience the ultimate convenience with Tiffinly&apos;s
-                subscription service. Enjoy freshly prepared Indian meals, ready
-                for pickup whenever you need them.
-              </motion.p>
+            Daily fresh Indian meals — pick up anytime from your nearest store or get them delivered to your home, all on one simple subscription.          </motion.p>
 
               <motion.div
                 initial={{ y: 20, opacity: 0 }}
@@ -387,48 +514,46 @@ export default function HomePage() {
                 </div> */}
                 
                 {/* Waitlist Email Signup */}
-                <div className="space-y-4">
-                  <div className="flex flex-col gap-3 max-w-md">
-                    <div className="flex flex-row gap-3">
+                <div className="space-y-4 w-full">
+                  <div className="flex flex-row items-center gap-3 w-full justify-start flex-nowrap">
+                    <input
+                      type="email"
+                      placeholder="Enter your email address"
+                      value={heroEmail}
+                      onChange={(e) => handleEmailChange(e.target.value, setHeroEmail, setHeroEmailError)}
+                      className={`flex-1 min-w-0 px-4 py-3 rounded-full border-0 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 h-12 ${
+                        heroEmailError ? 'focus:ring-red-500/50' : 'focus:ring-white/50'
+                      }`}
+                    />
+                    {/* Honeypot field – hidden from real users */}
+                    <div className="sr-only" aria-hidden="true">
+                      <label htmlFor="hero-company" className="block text-sm">Company</label>
                       <input
-                        type="email"
-                        placeholder="Enter your email address"
-                        value={heroEmail}
-                        onChange={(e) => handleEmailChange(e.target.value, setHeroEmail, setHeroEmailError)}
-                        className={`flex-1 px-4 py-3 rounded-full border-0 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 h-12 ${
-                          heroEmailError ? 'focus:ring-red-500/50' : 'focus:ring-white/50'
-                        }`}
+                        id="hero-company"
+                        type="text"
+                        tabIndex={-1}
+                        autoComplete="off"
+                        value={heroHoneypot}
+                        onChange={(event) => setHeroHoneypot(event.target.value)}
+                        className="mt-1 w-full rounded border border-gray-200 bg-white text-gray-900"
                       />
-                      {/* Honeypot field – hidden from real users */}
-                      <div className="sr-only" aria-hidden="true">
-                        <label htmlFor="hero-company" className="block text-sm">Company</label>
-                        <input
-                          id="hero-company"
-                          type="text"
-                          tabIndex={-1}
-                          autoComplete="off"
-                          value={heroHoneypot}
-                          onChange={(event) => setHeroHoneypot(event.target.value)}
-                          className="mt-1 w-full rounded border border-gray-200 bg-white text-gray-900"
-                        />
-                      </div>
-                      <Button 
-                        className="bg-black text-white hover:bg-gray-800 px-6 py-3 rounded-full font-medium h-12 whitespace-nowrap"
-                        onClick={() => handleEmailSubmit(
-                          heroEmail,
-                          heroHoneypot,
-                          setHeroEmailError,
-                          setHeroEmail,
-                          () => setHeroHoneypot("")
-                        )}
-                      >
-                        Join Waitlist
-                      </Button>
                     </div>
-                    {heroEmailError && (
-                      <p className="text-black text-sm ml-1">{heroEmailError}</p>
-                    )}
+                    <Button 
+                      className="bg-black text-white hover:bg-gray-800 px-6 py-3 rounded-full font-medium h-12 whitespace-nowrap shrink-0"
+                      onClick={() => handleEmailSubmit(
+                        heroEmail,
+                        heroHoneypot,
+                        setHeroEmailError,
+                        setHeroEmail,
+                        () => setHeroHoneypot("")
+                      )}
+                    >
+                      Join Waitlist
+                    </Button>
                   </div>
+                  {heroEmailError && (
+                    <p className="text-black text-sm ml-1">{heroEmailError}</p>
+                  )}
                 </div>
                 
                 <motion.p
@@ -446,7 +571,7 @@ export default function HomePage() {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.6, delay: 0.45 }}
-              className="flex justify-center md:justify-end"
+              className="flex justify-center md:justify-end w-full"
             >
               <Image
                 src={frame5}
@@ -611,7 +736,7 @@ export default function HomePage() {
       </section>
 
       {/* Subscription Options Section */}
-      <section id="subscription-options" className="relative py-16 sm:py-20 md:py-32 overflow-hidden">
+      <section id="subscription-options" className="relative py-16 sm:py-20 md:py-32 overflow-hidden md:flex md:items-center">
         {/* Background Image - Mobile */}
         <div className="absolute inset-0 z-0 md:hidden">
           <Image
@@ -633,112 +758,14 @@ export default function HomePage() {
           />
         </div>
         
-        <div className="relative z-10 max-w-[1200px] mx-auto px-6 sm:px-6">
-          <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            whileInView={{ y: 0, opacity: 1 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <div className="bg-green-900/100 md:bg-transparent rounded-lg p-6 md:p-0">
-              <h2 className="text-3xl md:text-4xl font-bold text-white md:text-gray-900 mb-4">
-                Subscription Options
-              </h2>
-              <p className="text-base sm:text-lg text-green-100 md:text-gray-600">
-                Choose the plan that works best for your lifestyle
-              </p>
+        <div className="relative z-10 w-full px-4 sm:px-6">
+          <div className="md:hidden max-w-4xl mx-auto">
+            {renderSubscriptionContent()}
+          </div>
+          <div className="hidden md:flex items-center justify-center">
+            <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12 max-w-[1000px] w-full">
+              {renderSubscriptionContent()}
             </div>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 max-w-4xl mx-auto">
-            {[
-              {
-                title: "Weekly Plan",
-                subtitle: "Try our meals for a week",
-                price: "$55",
-                period: "per week",
-                features: [
-                  "5 delicious home style meals per week",
-                  "Pickup any time at any store*",
-                  "Upgrade to Monthly Plan",
-                  "Fresh meals Served Monday to Friday",
-                  " Weekly Flexible Plan",
-                ],
-                popular: false,
-              },
-              {
-                title: "Monthly Plan",
-                subtitle: "Best value for busy students and professionals",
-                price: "$180",
-                period: "per month",
-                features: [
-                  "20 delicious home style meals per month",
-                  "Pickup any time at any store*",
-                  "Fresh meals Served Monday to Friday",
-                  "Best value guarantee"
-                ],
-                popular: true,
-                savings: "Save $40/month",
-              },
-            ].map((plan, index) => (
-              <motion.div
-                key={index}
-                initial={{ y: 50, opacity: 0 }}
-                whileInView={{ y: 0, opacity: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.2 }}
-                className="relative"
-              >
-                <Card
-                  className={`p-6 sm:p-8 h-full shadow-2xl hover:shadow-3xl transition-shadow duration-300 border-0 ${
-                    plan.popular ? "text-white bg-gradient-to-br from-orange-500 to-red-600" : "bg-white"
-                  }`}
-                >
-                  <CardContent className="p-0">
-                    {plan.popular && (
-                      <div className="absolute -top-3 right-4 sm:right-6">
-                        <Badge className="bg-black text-white px-4 py-1">
-                          Most Popular
-                        </Badge>
-                      </div>
-                    )}
-                    
-                    <div className="text-center mb-6">
-                      <h3 className={`text-2xl font-bold mb-2 ${plan.popular ? 'text-white' : 'text-gray-900'}`}>
-                        {plan.title}
-                      </h3>
-                      <p className={`text-sm mb-4 ${plan.popular ? 'text-white' : 'text-gray-600'}`}>
-                        {plan.subtitle}
-                      </p>
-                      <div className="flex items-baseline justify-center mb-2">
-                        <span className={`text-5xl font-bold ${plan.popular ? 'text-white' : 'text-gray-900'}`}>{plan.price}</span>
-                        <span className={`ml-2 ${plan.popular ? 'text-white' : 'text-gray-600'}`}>/{plan.period}</span>
-                      </div>
-                      {plan.savings && (
-                        <div className="inline-block bg-green-100 text-green-800 text-sm font-medium px-3 py-1 rounded-full">
-                          {plan.savings}
-                        </div>
-                      )}
-                    </div>
-                    
-                    <ul className="space-y-4 mb-6">
-                      {plan.features.map((feature, featureIndex) => (
-                        <li key={featureIndex} className="flex items-start">
-                          <Check className={`w-5 h-5 mr-3 flex-shrink-0 mt-0.5 ${plan.popular ? 'text-white' : 'text-green-500'}`} />
-                          <span className={`text-sm leading-relaxed ${plan.popular ? 'text-white' : 'text-gray-700'}`}>{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-                    
-                    <div className="text-center">
-                      <div className={`text-xs mb-2 ${plan.popular ? 'text-white' : 'text-gray-500'}`}>
-                        Subscribe In-App • Cancel anytime
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
           </div>
         </div>
       </section>
@@ -757,7 +784,7 @@ export default function HomePage() {
             className="text-center mb-16"
           >
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              Customer testimonials
+              Early Adopters testimonials
             </h2>
             <p className="text-base sm:text-lg text-gray-200">
               See what our happy customers have to say about their experience with our meal plans.
