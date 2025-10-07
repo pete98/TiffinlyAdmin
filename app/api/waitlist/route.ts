@@ -53,10 +53,22 @@ export async function POST(request: NextRequest) {
       `,
     };
 
-    // Send email
-    await transporter.sendMail(mailOptions);
-    
-    console.log(`Waitlist signup email sent: ${email}`);
+    // Send email with better error handling
+    try {
+      const info = await transporter.sendMail(mailOptions);
+      console.log(`Waitlist signup email sent: ${email}`);
+      console.log('Message ID:', info.messageId);
+      console.log('Preview URL:', nodemailer.getTestMessageUrl(info));
+    } catch (emailError: any) {
+      console.error('Email sending failed:', {
+        error: emailError.message,
+        code: emailError.code,
+        command: emailError.command,
+        responseCode: emailError.responseCode,
+        response: emailError.response,
+      });
+      throw emailError;
+    }
 
     return NextResponse.json(
       { 
