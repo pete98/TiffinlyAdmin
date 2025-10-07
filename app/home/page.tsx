@@ -514,8 +514,8 @@ export default function HomePage() {
                 </div> */}
                 
                 {/* Waitlist Email Signup */}
-                <div className="space-y-4 w-full">
-                  <div className="flex flex-row items-center gap-3 w-full justify-start flex-nowrap">
+                <div className="space-y-4 w-full ">
+                  <div className="flex flex-row items-center gap-3 w-full justify-start flex-wrap">
                     <input
                       type="email"
                       placeholder="Enter your email address"
