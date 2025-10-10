@@ -24,6 +24,7 @@ import pickupImage from "@/assets/pick up image.png";
 import pickup from "@/assets/pickup.png";
 import subbann from "@/assets/subbann.png";
 import sub from "@/assets/food/sub.png";
+import multiImage from "@/assets/food/multi.png";
 import indianCurryIndiaGif from "@/assets/Indian Curry India GIF.gif";
 import pbutterGif from "@/assets/pbutter.gif";
 import indianCurryFoodGif from "@/assets/Indian Curry Food GIF.gif";
@@ -669,7 +670,7 @@ export default function HomePage() {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
             {[
               {
                 title: "Convenience & Time Saving",
@@ -686,8 +687,16 @@ export default function HomePage() {
                 isCarousel: false,
               },
               {
+                title: "Weekly Rotating Menu",
+                description:
+                  "Enjoy something different every week—no fixed thali or repetitive routine, just exciting new homestyle flavours.",
+                image: multiImage,
+                isCarousel: false,
+              },
+              {
                 title: "Healthy HomeStyle Food",
-                description: "Cooked overnight, delivered fresh every morning or evening — real daily meals, not weekly fridge food.",
+                description:
+                  "Cooked overnight, delivered fresh every morning or evening — real daily meals, not weekly fridge food.",
                 image: sub,
                 isCarousel: false,
               },
