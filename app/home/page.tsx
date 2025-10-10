@@ -127,7 +127,7 @@ export default function HomePage() {
         "5 delicious home style meals per week",
         "Just $11 per meal",
         "Pickup any time from any store*",
-        "Add doorstep delivery for $4 per meal",
+        "Free scheduled home delivery",
         "Upgrade to the monthly plan anytime",
       ],
       popular: false as const,
@@ -142,7 +142,7 @@ export default function HomePage() {
         "Just $10 per meal",
         "Free scheduled home delivery",
         "Pickup any time at any store*",
-        "Best value save up to $80/month",
+        "Best value save up to $20/month",
       ],
       popular: true as const,
      
@@ -205,33 +205,31 @@ export default function HomePage() {
                 </div>
                 
                 <ul className="space-y-3 md:space-y-4 mb-5 md:mb-6">
-                  {plan.features.map((feature, featureIndex) => (
-                    <li key={featureIndex} className="flex items-start">
-                      <Check
-                        className={`w-5 h-5 mr-3 flex-shrink-0 mt-0.5 ${
-                          plan.popular && (
-                            feature === "Free scheduled home delivery" ||
-                            feature === "Best value save up to $80/month"
-                          )
-                            ? "text-orange-500"
-                            : "text-gray-900"
-                        }`}
-                      />
-                      <span
-                        className={`text-sm md:text-base leading-relaxed ${
-                          plan.popular && feature === "Free scheduled home delivery"
-                            ? "bg-gradient-to-r from-orange-500 to-red-600 text-white px-2 py-1 rounded-md"
-                            : plan.popular && feature === "Best value save up to $80/month"
-                            ? "bg-gradient-to-r from-orange-500 to-red-600 text-white px-2 py-1 rounded-md"
-                            : plan.popular
-                            ? "text-gray-700"
-                            : "text-gray-700"
-                        }`}
-                      >
-                        {feature}
-                      </span>
-                    </li>
-                  ))}
+                  {plan.features.map((feature, featureIndex) => {
+                    const isFreeDelivery = feature === "Free scheduled home delivery";
+                    const isMonthlyHighlight =
+                      plan.popular && feature === "Best value save up to $20/month";
+                    const isHighlighted = isFreeDelivery || isMonthlyHighlight;
+
+                    return (
+                      <li key={featureIndex} className="flex items-start">
+                        <Check
+                          className={`w-5 h-5 mr-3 flex-shrink-0 mt-0.5 ${
+                            isHighlighted ? "text-orange-500" : "text-gray-900"
+                          }`}
+                        />
+                        <span
+                          className={`text-sm md:text-base leading-relaxed ${
+                            isHighlighted
+                              ? "bg-gradient-to-r from-orange-500 to-red-600 text-white px-2 py-1 rounded-md"
+                              : "text-gray-700"
+                          }`}
+                        >
+                          {feature}
+                        </span>
+                      </li>
+                    );
+                  })}
                 </ul>
                 
                 <div className="text-center">
@@ -246,7 +244,6 @@ export default function HomePage() {
       </div>
     </>
   );
-
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentImageIndex((prevIndex) => 
@@ -677,7 +674,7 @@ export default function HomePage() {
               {
                 title: "Convenience & Time Saving",
                 description:
-                  "Pressed for time with classes or work? Skip cooking, your fresh meal is ready for easy pickup on your way or get it delivered to your scheduled time.",
+                  "Skip cooking, your fresh meal is ready for easy pickup on your route or get it delivered to your scheduled time daily.",
                 image: pickup,
                 isCarousel: false,
               },
@@ -690,7 +687,7 @@ export default function HomePage() {
               },
               {
                 title: "Healthy HomeStyle Food",
-                description: "Fresh healthy meals with the taste of home, just like mom's cooking. No more instant noodles or takeout.",
+                description: "Cooked overnight, delivered fresh every morning or evening — real daily meals, not weekly fridge food.",
                 image: sub,
                 isCarousel: false,
               },
