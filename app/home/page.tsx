@@ -689,7 +689,7 @@ export default function HomePage() {
               {
                 title: "Weekly Rotating Menu",
                 description:
-                  "Enjoy something different every week—no fixed thali or repetitive routine, just exciting new homestyle flavours.",
+                  "Enjoy something different every week, no fixed thali or repetitive routine, just exciting new homestyle foods.",
                 image: multiImage,
                 isCarousel: false,
               },
