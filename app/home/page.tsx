@@ -4,15 +4,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-} from "@/components/ui/navigation-menu";
-import { Star, Check, ArrowRight, Menu, X } from "lucide-react";
+import { Star, Check } from "lucide-react";
 import Image from "next/image";
 import heroImage from "@/assets/wireframe1.png";
 import frame1 from "@/assets/Frame 1.png";
@@ -28,24 +20,21 @@ import multiImage from "@/assets/food/multi.png";
 import indianCurryIndiaGif from "@/assets/Indian Curry India GIF.gif";
 import pbutterGif from "@/assets/pbutter.gif";
 import indianCurryFoodGif from "@/assets/Indian Curry Food GIF.gif";
-import tiffinlyBanner from "@/assets/TiffinlyBann.png";
 import veggisImage from "@/assets/veggis.png";
 import veggipImage from "@/assets/veggip.png";
 import hetImage from "@/assets/people/het.jpeg";
 import bharatImage from "@/assets/people/bharat.png";
-import moumitaImage from "@/assets/people/moumita.png";
+import ruchitImage from "@/assets/people/ruchit.png";
+import Link from "next/link";
 import { useState, useEffect } from "react";
 import { WeeklyMenuSection } from "@/components/menu-items/weekly-menu-section";
+import { PublicHeader } from "@/components/layout/public-header";
 
 export default function HomePage() {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [heroEmail, setHeroEmail] = useState("");
   const [heroEmailError, setHeroEmailError] = useState("");
   const [heroHoneypot, setHeroHoneypot] = useState("");
-  const [ctaEmail, setCtaEmail] = useState("");
-  const [ctaEmailError, setCtaEmailError] = useState("");
-  const [ctaHoneypot, setCtaHoneypot] = useState("");
   
   // Email validation function
   const validateEmail = (email: string): boolean => {
@@ -118,11 +107,20 @@ export default function HomePage() {
     indianCurryFoodGif,
   ];
 
+  const scrollToSubscription = () => {
+    const section = document.getElementById("subscription-options");
+    if (section) {
+      section.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   const pickupPlans = [
     {
       title: "Weekly Plan",
       subtitle: "Try our meals for a week",
       price: "$55",
+      introPrice: "$25",
+      introOffer: "Introductory offer: Get first week only for $25",
       period: "per week",
       features: [
         "5 delicious home style meals per week",
@@ -183,11 +181,18 @@ export default function HomePage() {
               }`}
             >
               <CardContent className="p-0">
-                {plan.popular && (
-                  <div className="absolute -top-3 right-4 sm:right-6">
-                    <Badge className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-4 py-1 font-semibold shadow-lg">
-                      Most Popular
-                    </Badge>
+                {(plan.introOffer || plan.popular) && (
+                  <div className="flex justify-center mb-4 gap-2">
+                    {plan.introOffer && (
+                      <Badge className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-4 py-1 text-xs sm:text-sm font-semibold shadow-lg">
+                        {plan.introOffer}
+                      </Badge>
+                    )}
+                    {plan.popular && (
+                      <Badge className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-4 py-1 font-semibold shadow-lg">
+                        Most Popular
+                      </Badge>
+                    )}
                   </div>
                 )}
                 
@@ -199,8 +204,24 @@ export default function HomePage() {
                     {plan.subtitle}
                   </p>
                   <div className="flex items-baseline justify-center mb-2">
-                    <span className={`text-5xl md:text-6xl font-bold ${plan.popular ? 'text-gray-900' : 'text-gray-900'}`}>{plan.price}</span>
-                    <span className={`ml-2 text-base md:text-lg ${plan.popular ? 'text-gray-700' : 'text-gray-600'}`}>/{plan.period}</span>
+                    {plan.introPrice ? (
+                      <>
+                        <span className="text-3xl md:text-4xl font-semibold text-gray-400 line-through mr-3">
+                          {plan.price}
+                        </span>
+                        <span className="text-5xl md:text-6xl font-bold text-gray-900">
+                          {plan.introPrice}
+                        </span>
+                        <span className={`ml-2 text-base md:text-lg ${plan.popular ? 'text-gray-700' : 'text-gray-600'}`}>
+                          /{plan.period}
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <span className={`text-5xl md:text-6xl font-bold ${plan.popular ? 'text-gray-900' : 'text-gray-900'}`}>{plan.price}</span>
+                        <span className={`ml-2 text-base md:text-lg ${plan.popular ? 'text-gray-700' : 'text-gray-600'}`}>/{plan.period}</span>
+                      </>
+                    )}
                   </div>
       
                 </div>
@@ -333,116 +354,7 @@ export default function HomePage() {
           WebkitOverflowScrolling: "touch",
         }}
       >
-        {/* Header */}
-        <motion.header
-          initial={{ y: -20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          className="bg-white border-b border-gray-100 px-3 sm:px-4 pb-1 sm:pb-2"
-          style={{
-            paddingTop: 'max(env(safe-area-inset-top, 0px), 14px)',
-            backgroundColor: '#ffffff'
-          }}
-        >
-          <div className="max-w-[1200px] mx-auto flex items-center justify-between gap-2">
-            {/* Logo */}
-            <div className="flex items-center justify-center">
-              <Image 
-                src={tiffinlyBanner} 
-                alt="Tiffinly Banner" 
-                width={116} 
-                height={38}
-                className="rounded-sm"
-              />
-            </div>
-
-            {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center space-x-6">
-              <a
-                href="#"
-                className="text-gray-600 hover:text-gray-900 transition-colors"
-              >
-                Home
-              </a>
-               <a
-                href="#simple-steps"
-                className="text-gray-600 hover:text-gray-900 transition-colors relative after:absolute after:left-0 after:-bottom-1 after:h-0.5 after:bg-gray-900 after:w-0 hover:after:w-full after:transition-all after:duration-300"
-              >
-                How it works
-              </a>
-              <a
-                href="#subscription-options"
-                className="text-gray-600 hover:text-gray-900 transition-colors relative after:absolute after:left-0 after:-bottom-1 after:h-0.5 after:bg-gray-900 after:w-0 hover:after:w-full after:transition-all after:duration-300"
-              >
-                Pricing
-              </a>
-              <a
-                href="#weekly-menu"
-                className="text-gray-600 hover:text-gray-900 transition-colors relative after:absolute after:left-0 after:-bottom-1 after:h-0.5 after:bg-gray-900 after:w-0 hover:after:w-full after:transition-all after:duration-300"
-              >
-                Menu
-              </a>
-              
-             
-              {/* <Button className="bg-brand hover:bg-brand/90 text-white">
-                Download
-              </Button> */}
-            </nav>
-
-            {/* Mobile Menu Button */}
-            <div className="lg:hidden flex items-center space-x-2">
-              {/* <Button className="bg-brand hover:bg-brand/90 text-white">
-                Download
-              </Button> */}
-              <button
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="p-1.5"
-              >
-                {isMobileMenuOpen ? (
-                  <X className="h-5 w-5" />
-                ) : (
-                  <Menu className="h-5 w-5" />
-                )}
-              </button>
-            </div>
-          </div>
-
-          {/* Mobile Navigation Menu */}
-          {isMobileMenuOpen && (
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="lg:hidden bg-white border-t border-gray-100 px-3 py-3 sm:px-4"
-              style={{ backgroundColor: '#ffffff' }}
-            >
-              <nav className="flex flex-col space-y-3">
-                <a
-                  href="#"
-                  className="text-gray-600 hover:text-gray-900 transition-colors"
-                >
-                  Home
-                </a>
-                <a
-                  href="#weekly-menu"
-                  className="text-gray-600 hover:text-gray-900 transition-colors"
-                >
-                  Menu
-                </a>
-                <a
-                  href="#subscription-options"
-                  className="text-gray-600 hover:text-gray-900 transition-colors"
-                >
-                  Pricing
-                </a>
-                <a
-                  href="#simple-steps"
-                  className="text-gray-600 hover:text-gray-900 transition-colors"
-                >
-                  How it works
-                </a>
-              </nav>
-            </motion.div>
-          )}
-        </motion.header>
+        <PublicHeader />
         {/* Repeating Stripe Pattern */}
         <div className="bg-black py-3 overflow-hidden">
         <div className="flex animate-scroll">
@@ -472,8 +384,16 @@ export default function HomePage() {
                 transition={{ duration: 0.6 }}
                 className="space-y-4"
               >
-                <div className="inline-block bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 border border-white/30">
-                  <span className="text-white text-sm font-medium">Launching Soon</span>
+                <div className="flex flex-wrap items-center gap-3">
+                  <Badge className="bg-white/20 text-white border border-white/30 px-3 py-1 text-xs font-semibold uppercase tracking-wide">
+                    Launching Soon
+                  </Badge>
+                  <Badge
+                    className="cursor-pointer bg-white text-orange-600 px-3 py-1 text-xs font-semibold uppercase tracking-wide shadow-lg transition hover:bg-white/90"
+                    onClick={scrollToSubscription}
+                  >
+                    Intro Offer: First Week $25
+                  </Badge>
                 </div>
                 <h1
                   className="text-5xl sm:text-5xl md:text-6xl font-black text-white leading-tight tracking-tight"
@@ -817,9 +737,9 @@ export default function HomePage() {
               },
               {
                 text: "The meals are always ready on time and save me so much effort during my busy week. Super convenient!",
-                name: "Moumita",
-                position: "Senior Quality Assurance Engineer",
-                image: moumitaImage,
+                name: "Dr. Ruchit",
+                position: "Physical Therapy",
+                image: ruchitImage,
               }
             ].map((testimonial, index) => (
               <motion.div
@@ -894,52 +814,19 @@ export default function HomePage() {
               </Button>
             </div> */}
             
-            {/* Waitlist Email Signup */}
+            {/* FAQ CTA */}
             <div className="space-y-4">
-              <h3 className="text-xl font-semibold text-black">Enter Email to Join Waitlist</h3>
-              <div className="flex flex-col gap-3 max-w-md">
-                <div className="flex flex-row gap-3">
-                  <input
-                    type="email"
-                    placeholder="Enter your email address"
-                    value={ctaEmail}
-                    onChange={(e) => handleEmailChange(e.target.value, setCtaEmail, setCtaEmailError)}
-                    className={`flex-1 px-4 py-3 rounded-full border text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 h-12 ${
-                      ctaEmailError 
-                        ? 'border-red-500 focus:ring-red-500/50' 
-                        : 'border-gray-300 focus:ring-orange-500/50'
-                    }`}
-                  />
-                  {/* Honeypot field – hidden from real users */}
-                  <div className="sr-only" aria-hidden="true">
-                    <label htmlFor="cta-company" className="block text-sm">Company</label>
-                    <input
-                      id="cta-company"
-                      type="text"
-                      tabIndex={-1}
-                      autoComplete="off"
-                      value={ctaHoneypot}
-                      onChange={(event) => setCtaHoneypot(event.target.value)}
-                      className="mt-1 w-full rounded border border-gray-200 bg-white text-gray-900"
-                    />
-                  </div>
-                  <Button 
-                    className="bg-black text-white hover:bg-gray-800 px-6 py-3 rounded-full font-medium h-12 whitespace-nowrap"
-                    onClick={() => handleEmailSubmit(
-                      ctaEmail,
-                      ctaHoneypot,
-                      setCtaEmailError,
-                      setCtaEmail,
-                      () => setCtaHoneypot("")
-                    )}
-                  >
-                    Join Waitlist
-                  </Button>
-                </div>
-                {ctaEmailError && (
-                  <p className="text-black text-sm ml-1">{ctaEmailError}</p>
-                )}
-              </div>
+              <h3 className="text-xl font-semibold text-black">Have questions before you join?</h3>
+              <p className="text-base text-gray-600 max-w-xl">
+                Explore our FAQ to learn how subscriptions work, when to place your order, and what delivery windows are available.
+              </p>
+              <Button
+                asChild
+                variant="outline"
+                className="border-gray-300 text-black hover:bg-gray-50 rounded-full w-full sm:w-auto"
+              >
+                <Link href="/faq">Visit FAQ Page</Link>
+              </Button>
             </div>
           </motion.div>
         </div>
@@ -957,93 +844,30 @@ export default function HomePage() {
             {/* Company Links */}
             <div>
               <h4 className="font-semibold text-white mb-4">Company</h4>
-              <ul className="space-y-2">
-                <li>
-                  <a
-                    href="#"
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    About Us
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    Blog
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    Careers
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    Contact Us
-                  </a>
-                </li>
+              <ul className="space-y-2 text-gray-500">
+                <li className="cursor-not-allowed select-none">About Us</li>
+                <li className="cursor-not-allowed select-none">Blog</li>
+                <li className="cursor-not-allowed select-none">Careers</li>
+                <li className="cursor-not-allowed select-none">Contact Us</li>
               </ul>
             </div>
 
             {/* Legal Links */}
             <div>
               <h4 className="font-semibold text-white mb-4">Legal</h4>
-              <ul className="space-y-2">
-                <li>
-                  <a
-                    href="#"
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    Terms of Service
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    Privacy Policy
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    Refund Policy
-                  </a>
-                </li>
+              <ul className="space-y-2 text-gray-500">
+                <li className="cursor-not-allowed select-none">Terms of Service</li>
+                <li className="cursor-not-allowed select-none">Privacy Policy</li>
+                <li className="cursor-not-allowed select-none">Refund Policy</li>
               </ul>
             </div>
 
             {/* Support Links */}
             <div>
               <h4 className="font-semibold text-white mb-4">Support</h4>
-              <ul className="space-y-2">
-                <li>
-                  <a
-                    href="#"
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    FAQ
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    Help Center
-                  </a>
-                </li>
+              <ul className="space-y-2 text-gray-500">
+                <li className="cursor-not-allowed select-none">FAQ</li>
+                <li className="cursor-not-allowed select-none">Help Center</li>
               </ul>
             </div>
           </div>
