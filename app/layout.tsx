@@ -1,5 +1,5 @@
 import type React from "react"
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
@@ -18,13 +18,9 @@ export const metadata: Metadata = {
   formatDetection: {
     telephone: false,
   },
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f97316" },
-    { media: "(prefers-color-scheme: dark)", color: "#111827" },
-  ],
 }
 
-export const viewport = {
+export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
@@ -32,6 +28,10 @@ export const viewport = {
   // Ensure proper iOS Safari behavior
   maximumScale: 1,
   minimumScale: 1,
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f97316" },
+    { media: "(prefers-color-scheme: dark)", color: "#111827" },
+  ],
 }
 
 export default function RootLayout({
@@ -45,8 +45,6 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="format-detection" content="telephone=no" />
-        <meta name="theme-color" content="#ffffff" />
-        <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: dark)" />
         <meta
           name="viewport"
           content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover"

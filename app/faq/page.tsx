@@ -33,12 +33,7 @@ const faqs = [
   {
     question: "Do you offer delivery?",
     answer:
-      "Yes, every plan includes free scheduled home delivery. Simply set your preferred delivery window in the app and we will take care of the rest.",
-  },
-  {
-    question: "When should I place my order and what delivery windows can I choose?",
-    answer:
-      "Place or update your order in the app by 6 pm a day before. You can select a morning or evening delivery window, or opt for pickup at any store during its business hours. We will send reminders so you never miss the cutoff.",
+      "Yes, every plan includes free home delivery. Your food will be delivered between 10–11 AM, Monday through Friday. You can also choose to pick up your meals anytime during store hours at any of our partnered locations for added flexibility.",
   },
   {
     question: "How do I contact support?",

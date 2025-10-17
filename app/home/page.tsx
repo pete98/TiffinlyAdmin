@@ -22,9 +22,6 @@ import pbutterGif from "@/assets/pbutter.gif";
 import indianCurryFoodGif from "@/assets/Indian Curry Food GIF.gif";
 import veggisImage from "@/assets/veggis.png";
 import veggipImage from "@/assets/veggip.png";
-import hetImage from "@/assets/people/het.jpeg";
-import bharatImage from "@/assets/people/bharat.png";
-import ruchitImage from "@/assets/people/ruchit.png";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { WeeklyMenuSection } from "@/components/menu-items/weekly-menu-section";
@@ -727,19 +724,16 @@ export default function HomePage() {
                 text: "Delicious food and excellent service! Highly recommend.",
                 name: "Het",
                 position: "Software Engineer",
-                image: hetImage,
               },
               {
                 text: "The affordable plan fits my budget perfectly and saves me hours every week. Highly recommend for busy students!",
                 name: "Bharat",
                 position: "Student",
-                image: bharatImage,
               },
               {
                 text: "The meals are always ready on time and save me so much effort during my busy week. Super convenient!",
                 name: "Dr. Ruchit",
                 position: "Physical Therapy",
-                image: ruchitImage,
               }
             ].map((testimonial, index) => (
               <motion.div
@@ -766,18 +760,9 @@ export default function HomePage() {
                 </blockquote>
 
                 {/* Author Info */}
-                <div className="flex items-center">
-                  <Image
-                    src={testimonial.image}
-                    alt={`${testimonial.name} portrait`}
-                    width={40}
-                    height={40}
-                    className="w-10 h-10 rounded-full object-cover mr-3 flex-shrink-0"
-                  />
-                  <div>
-                    <p className="font-semibold text-gray-900">{testimonial.name}</p>
-                    <p className="text-sm text-gray-600">{testimonial.position}</p>
-                  </div>
+                <div className="mt-auto pt-4 border-t border-gray-200">
+                  <p className="font-semibold text-gray-900">{testimonial.name}</p>
+                  <p className="text-sm text-gray-600">{testimonial.position}</p>
                 </div>
               </motion.div>
             ))}
